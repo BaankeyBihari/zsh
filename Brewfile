@@ -43,6 +43,10 @@ brew "ollama"
 cask "iterm2"
 cask "miniconda"
 
+# Nerd Font — required glyphs for the starship pastel-powerline prompt.
+# Set iTerm2 font to "MesloLGS Nerd Font" (Profiles → Text).
+cask "font-meslo-lg-nerd-font"
+
 # Apps
 cask "maccy"
 cask "sublime-text"
