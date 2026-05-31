@@ -30,3 +30,28 @@ gCloner() {
   repoName="$(basename -s .git "$repoUrl")"
   git clone --branch "$branchName" "$repoUrl" "$repoName/$branchName"
 }
+
+# rename-tab — set a sticky title on the current terminal tab/window.
+# Uses OSC 1 (tab/icon) + OSC 2 (window) escape codes, which iTerm2, Terminal.app,
+# and xterm-compatible emulators honour. printf (not print -P) so the title is
+# taken literally — no prompt/% expansion of user input.
+#
+# iTerm2's shell integration re-derives the title every prompt, which would wipe a
+# one-shot escape. So we register a precmd hook that re-asserts the chosen title
+# until you clear it. Call with no argument to release the tab back to the default.
+#
+#   rename-tab deploy      # tab now reads "deploy" and stays that way
+#   rename-tab "api logs"  # spaces are fine
+#   rename-tab             # clear — auto-title resumes
+_rename_tab_apply() { printf '\e]1;%s\a\e]2;%s\a' "$__TAB_TITLE" "$__TAB_TITLE"; }
+rename-tab() {
+  autoload -Uz add-zsh-hook
+  if [[ $# -eq 0 ]]; then
+    unset __TAB_TITLE
+    add-zsh-hook -d precmd _rename_tab_apply 2>/dev/null
+    return 0
+  fi
+  typeset -g __TAB_TITLE="$*"
+  add-zsh-hook precmd _rename_tab_apply   # re-assert each prompt (idempotent)
+  _rename_tab_apply                        # and apply right now
+}
