@@ -19,6 +19,7 @@ brew "gh"
 
 # Productivity
 brew "fzf"
+brew "tree"
 
 # Python tooling
 brew "uv"
