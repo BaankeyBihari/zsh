@@ -1,0 +1,10 @@
+# Copy this to 99-local.zsh (no .example suffix) to add machine-specific or secret
+# config. 99-local.zsh is gitignored and sourced LAST, so it can override any earlier
+# fragment.
+#
+# Examples:
+#
+# export ANTHROPIC_API_KEY="sk-…"
+# alias work='cd ~/work/this-machine-only'
+# path=(/Users/me/some/work/path $path) && export PATH
+# eval "$(direnv hook zsh)"

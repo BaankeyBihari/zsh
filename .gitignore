@@ -1,0 +1,17 @@
+# Rollback substrate — local only, never version-controlled.
+snapshots/
+
+# Machine-specific override layer (see config/99-local.zsh.example).
+99-local.zsh
+*.local.zsh
+
+# Machine/user-specific tooling state.
+.claude/settings.local.json
+.antigravitycli/
+
+# Shell history & sessions — never commit (per CLAUDE.md "do not commit").
+.zsh_history
+.zsh_sessions/
+
+# macOS cruft.
+.DS_Store
