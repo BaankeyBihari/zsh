@@ -1,0 +1,28 @@
+# ~/.zshenv — installed at $HOME by bin/install.sh; symlink target = ~/zsh/home/zshenv
+#
+# Sole purpose:
+#   1. Define XDG paths.
+#   2. Point zsh at $XDG_CONFIG_HOME/zsh for every other config file.
+#   3. Prime $PATH with Homebrew so login + non-interactive shells see /opt/homebrew/bin.
+#
+# Everything else lives under $ZDOTDIR. Do NOT add interactive niceties here; this file
+# is sourced for *every* zsh invocation, including scripts.
+
+: "${XDG_CONFIG_HOME:=$HOME/.config}"
+: "${XDG_DATA_HOME:=$HOME/.local/share}"
+: "${XDG_STATE_HOME:=$HOME/.local/state}"
+: "${XDG_CACHE_HOME:=$HOME/.cache}"
+export XDG_CONFIG_HOME XDG_DATA_HOME XDG_STATE_HOME XDG_CACHE_HOME
+
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+
+# Only shell out to `brew shellenv` if Homebrew isn't already on PATH. This file runs for
+# EVERY zsh invocation (incl. every script/subshell); the guard avoids paying ~50ms of
+# subprocess + eval on shells that already inherited a correct PATH from their parent.
+if [[ ":$PATH:" != *":/opt/homebrew/bin:"* && ":$PATH:" != *":/usr/local/bin:"* ]]; then
+  if [[ -x /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [[ -x /usr/local/bin/brew ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
+fi

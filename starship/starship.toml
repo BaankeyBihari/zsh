@@ -1,0 +1,16 @@
+# starship prompt config. See https://starship.rs/config/
+# Symlinked to ~/.config/starship.toml by bin/install.sh.
+
+add_newline = true
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+
+[cmd_duration]
+min_time = 2000
+style = "dim"
+
+[character]
+success_symbol = "[›](bold green)"
+error_symbol = "[›](bold red)"
