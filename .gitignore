@@ -6,7 +6,7 @@ snapshots/
 *.local.zsh
 
 # Machine/user-specific tooling state.
-.claude/settings.local.json
+.claude/
 .antigravitycli/
 
 # Shell history & sessions — never commit (per CLAUDE.md "do not commit").
