@@ -46,3 +46,8 @@ cask "miniconda"
 # Apps
 cask "maccy"
 cask "sublime-text"
+
+# Google Antigravity — agent orchestration platform, IDE, and terminal CLI.
+cask "antigravity"        # Antigravity.app — agent orchestration platform
+cask "antigravity-ide"    # AI coding agent IDE
+cask "antigravity-cli"    # terminal interface for Antigravity agents
