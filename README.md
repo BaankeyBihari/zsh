@@ -63,3 +63,13 @@ pre-commit autoupdate     # rewrite rev: to the latest tags; review, then commit
 
 Copy `config/99-local.zsh.example` to `~/.config/zsh/99-local.zsh`. It's gitignored and loads
 last, so it overrides anything. Never put secrets or per-machine paths in tracked files.
+
+## Extras (versioned here, not installed)
+
+Adjacent configs kept under version control that `install.sh` does **not** touch and nothing
+symlinks:
+
+- `extras/claude/GLOBAL_CLAUDE.md` — backup of my machine-global Claude Code rules
+  (live source: `~/.claude/CLAUDE.md`; also a public
+  [gist](https://gist.github.com/BaankeyBihari/f394e97eb10cfe17e031567205800517)). Snapshot
+  only — it may lag the live file; edit `~/.claude/CLAUDE.md` and re-copy to resync.

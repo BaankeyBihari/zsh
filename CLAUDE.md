@@ -97,6 +97,13 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
 machine-specific PATH. The `99-local.zsh` escape hatch (see `config/99-local.zsh.example`)
 exists precisely so these never enter the repo.
 
+## Extras (not repo config)
+
+`extras/claude/GLOBAL_CLAUDE.md` is a backup of the user's machine-global Claude Code rules
+(live source `~/.claude/CLAUDE.md`, also a public gist). It is **not** part of this repo's
+machinery: not symlinked, not touched by `bin/install.sh`, and may lag the live file. The
+global rules still apply via the live file, as in any repo — this copy is just the archive.
+
 ## Platform assumptions
 
 macOS + Apple Silicon (`/opt/homebrew`). conda defaults to `miniconda` via the Brewfile.
