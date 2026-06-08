@@ -20,6 +20,7 @@ brew "gh"
 # Productivity
 brew "fzf"
 brew "tree"
+brew "zoxide"   # smarter cd; provides `z`/`zi` (+ `j` alias) — init in config/60-tools.zsh
 
 # Python tooling
 brew "uv"
