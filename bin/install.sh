@@ -79,9 +79,11 @@ if [[ $DO_BREW -eq 1 ]]; then
 
   # --- 3b. uv tools ---
   # Python CLIs with no Homebrew formula, installed via uv (provisioned above).
-  # gita: manage many git repos at once. `uv tool install` is idempotent.
+  # gita: manage many git repos at once.
+  # nox: task automation / test matrices across Python versions.
+  # virtualenv: standalone venv creator. `uv tool install` is idempotent.
   if command -v uv >/dev/null 2>&1; then
-    for tool in gita; do
+    for tool in gita nox virtualenv; do
       if command -v "$tool" >/dev/null 2>&1; then
         log "uv tool present: $tool"
       else

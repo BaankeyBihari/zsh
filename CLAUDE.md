@@ -47,6 +47,8 @@ is what lets `99-local.zsh` coexist with managed files.
 ```sh
 bin/install.sh              # apply repo state — snapshot → brew → znap → symlinks → doctor. Idempotent.
 bin/install.sh --no-brew    # config/symlinks only (skip Homebrew + Brewfile)
+bin/update.sh               # upgrade installed packages — snapshot → brew update/upgrade → bundle → uv tool upgrade → doctor.
+bin/update.sh --greedy      # also upgrade self-updating casks; --no-cleanup keeps old versions
 bin/snapshot.sh             # manual snapshot before risky edits; prints the timestamp
 bin/rollback.sh             # list snapshots
 bin/rollback.sh <ts>        # restore a snapshot (or `latest`)
@@ -68,6 +70,11 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
   Edit the repo, then run `bin/install.sh`.
 - **`install.sh` snapshots before doing anything.** For edits applied by hand outside the
   installer, run `bin/snapshot.sh` first so rollback stays possible.
+- **`install.sh` provisions, `update.sh` upgrades — keep them separate.** `install.sh` only
+  installs what's missing (so it stays fast and deterministic); use `bin/update.sh` to pull
+  newer versions of brew packages + uv tools. Caveat: snapshots capture **config only**, so
+  `rollback.sh` does NOT undo a package upgrade — recover a bad brew upgrade with brew itself
+  (`brew install foo@<version>`), not rollback.
 - **Add behaviour as a new `NN-*.zsh` fragment** — do not extend `config/.zshrc`'s loader.
   Pick the prefix by category (see the load-order list above); files load in lexical order, so
   `zsh-syntax-highlighting` must stay last in `40-plugins.zsh`.
