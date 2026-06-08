@@ -22,7 +22,7 @@ home/      → ~/.zshenv, ~/.zprofile   (the only files placed in $HOME)
 config/    → ~/.config/zsh/*          (.zshrc driver + NN-*.zsh fragments)
 starship/  → ~/.config/starship.toml
 Brewfile     provisioned tools/apps
-bin/         install · snapshot · rollback · uninstall · doctor
+bin/         install · update · snapshot · rollback · uninstall · doctor
 snapshots/   timestamped backups (gitignored)
 ```
 
@@ -32,11 +32,31 @@ To add config, drop a new numbered fragment — don't edit `.zshrc`.
 ## Everyday commands
 
 ```sh
-bin/install.sh           # apply changes (idempotent)
+bin/install.sh           # apply changes (idempotent; installs missing, never upgrades)
+bin/update.sh            # upgrade brew packages + uv tools (see note below)
 bin/doctor.sh            # health check
 bin/snapshot.sh          # back up before risky edits
 bin/rollback.sh <ts>     # restore a snapshot (bin/rollback.sh lists them; `latest` works too)
 bin/uninstall.sh         # restore the most recent snapshot
+```
+
+## Pre-commit hooks
+
+`.pre-commit-config.yaml` guards the repo: `zsh -n` on the config fragments, `bash -n` on
+`bin/*.sh`, plus whitespace/EOF/merge-conflict checks. Activate once per clone:
+
+```sh
+pre-commit install        # wires .git/hooks/pre-commit; hooks then run on every commit
+pre-commit run --all-files # run them on demand
+```
+
+The external `pre-commit-hooks` repo is pinned by `rev:` so everyone runs the same, reviewed
+hook code (and a compromised upstream can't execute until you opt in). Bump that pin
+**deliberately** — it's not part of `bin/update.sh`, since it changes code that runs in your
+commit path and deserves a look before it lands:
+
+```sh
+pre-commit autoupdate     # rewrite rev: to the latest tags; review, then commit
 ```
 
 ## Machine-specific / secrets
