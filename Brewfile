@@ -16,6 +16,7 @@ brew "awscli"
 
 # Git/GitHub
 brew "gh"
+brew "pre-commit"   # manage git pre-commit hooks (.pre-commit-config.yaml)
 
 # Productivity
 brew "fzf"
