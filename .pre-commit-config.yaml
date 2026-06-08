@@ -1,0 +1,29 @@
+# pre-commit hooks for this dotfiles repo.
+# Activate once with `pre-commit install`; thereafter they run on every `git commit`.
+# Run on demand with `pre-commit run --all-files`.
+repos:
+  - repo: local
+    hooks:
+      # Syntax-check zsh config the way `zsh -n <fragment>` does (see CLAUDE.md).
+      # zsh -n only checks its first arg, so loop over every staged fragment.
+      - id: zsh-syntax-check
+        name: zsh -n (config fragments)
+        entry: bash -c 'rc=0; for f in "$@"; do zsh -n "$f" || rc=1; done; exit $rc' --
+        language: system
+        files: '^(config/.*\.zsh|config/\.zsh(env|rc)|home/(zshenv|zprofile))$'
+
+      # Syntax-check the provisioning scripts.
+      - id: bash-syntax-check
+        name: bash -n (bin scripts)
+        entry: bash -c 'rc=0; for f in "$@"; do bash -n "$f" || rc=1; done; exit $rc' --
+        language: system
+        files: '^bin/.*\.sh$'
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: check-executables-have-shebangs
