@@ -16,10 +16,13 @@ export XDG_CONFIG_HOME XDG_DATA_HOME XDG_STATE_HOME XDG_CACHE_HOME
 
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 
-# Only shell out to `brew shellenv` if Homebrew isn't already on PATH. This file runs for
-# EVERY zsh invocation (incl. every script/subshell); the guard avoids paying ~50ms of
-# subprocess + eval on shells that already inherited a correct PATH from their parent.
-if [[ ":$PATH:" != *":/opt/homebrew/bin:"* && ":$PATH:" != *":/usr/local/bin:"* ]]; then
+# Prime Homebrew unless it's already been primed by an ancestor shell. This file runs for
+# EVERY zsh invocation (incl. every script/subshell); gating on HOMEBREW_PREFIX (which
+# `brew shellenv` exports) means the first shell pays ~50ms once and children inherit it
+# and skip the subprocess. Don't gate on a PATH substring: /usr/local/bin is always in the
+# macOS default PATH, so that check skipped brew shellenv entirely — leaving /opt/homebrew/bin
+# stuck at the tail (after /usr/bin, via /etc/paths.d/homebrew) and HOMEBREW_PREFIX unset.
+if [[ -z "$HOMEBREW_PREFIX" ]]; then
   if [[ -x /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
   elif [[ -x /usr/local/bin/brew ]]; then
