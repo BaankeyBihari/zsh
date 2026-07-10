@@ -1,4 +1,4 @@
-# ~/.zshenv — installed at $HOME by bin/install.sh; symlink target = ~/zsh/home/zshenv
+# ~/.zshenv — copied to $HOME by bin/install.sh from ~/zsh/home/zshenv
 #
 # Sole purpose:
 #   1. Define XDG paths.

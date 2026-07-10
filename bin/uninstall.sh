@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # uninstall.sh — convenience wrapper: roll back to the most recent snapshot, which
-# removes repo-managed symlinks and restores the pre-install config.
+# removes the repo-managed copies and restores the pre-install config.
 #
 # This does NOT uninstall Homebrew packages — those are shared system state. Remove
 # them manually with `brew uninstall` / `brew bundle cleanup` if desired.

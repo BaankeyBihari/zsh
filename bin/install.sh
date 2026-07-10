@@ -2,10 +2,10 @@
 # install.sh — apply this repo's shell config to the machine. Idempotent: re-running
 # only does work where reality differs from the desired state.
 #
-# Flow: snapshot → Homebrew → Brewfile → uv tools → znap → symlinks → prime → doctor.
+# Flow: snapshot → Homebrew → Brewfile → uv tools → znap → copy config → prime → doctor.
 #
 # Flags:
-#   --no-brew          skip Homebrew + Brewfile steps (config/symlinks only)
+#   --no-brew          skip Homebrew + Brewfile steps (config copy only)
 #   --no-snapshot      skip the safety snapshot (NOT recommended)
 #   --skip-prime       don't warm znap plugin clones
 
@@ -29,28 +29,41 @@ done
 log()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m!!\033[0m %s\n' "$*" >&2; }
 
-# --- link helper: write symlink at $2 -> $1. ---
-# A real (non-symlink) file at the target is adopted ONLY when this run took a snapshot,
-# so the original is recoverable via rollback. Without a snapshot (--no-snapshot) we
-# refuse, to avoid destroying an unmanaged file with no backup.
-link() {
+sha() { shasum -a 256 "$1" 2>/dev/null | awk '{print $1}'; }
+
+# --- copy_file: install $1 (repo source) as a plain copy at $2. ---
+# Config is copied, not symlinked: a fragment deleted from the repo drops out of the
+# installed tree on the next run instead of leaving a dangling link. Tradeoff: editing a
+# repo file no longer takes effect until install.sh re-runs. If the destination already
+# holds a managed copy whose bytes differ from the repo source, warn before clobbering it
+# — the snapshot taken at the top of this run preserves the prior copy.
+copy_file() {
   local src="$1" dst="$2"
   if [[ -L "$dst" ]]; then
-    if [[ "$(readlink "$dst")" == "$src" ]]; then
-      return 0   # already correct
-    fi
-    rm "$dst"
-  elif [[ -e "$dst" ]]; then
-    if [[ $DO_SNAPSHOT -eq 1 ]]; then
-      rm -f "$dst"
-      log "adopted ${dst/#$HOME/~} (original preserved in this run's snapshot)"
-    else
-      warn "refusing to overwrite non-symlink without a snapshot: $dst (re-run without --no-snapshot, or remove it manually)"
-      return 0
-    fi
+    # Legacy symlink (old model) — often points at $src itself, which would make `cp` abort
+    # with "are identical". Drop it so we always write a real, independent copy.
+    rm -f "$dst"
+  elif [[ -f "$dst" && "$(sha "$dst")" != "$(sha "$src")" ]]; then
+    warn "overwriting local changes in ${dst/#$HOME/~} (snapshot holds the prior copy)"
   fi
-  ln -s "$src" "$dst"
-  log "linked ${dst/#$HOME/~} -> ${src/#$HOME/~}"
+  cp -f "$src" "$dst"
+  log "copied ${dst/#$HOME/~}"
+}
+
+# --- safe_rmrf: guarded `rm -rf`. ---
+# Both this installer and rollback.sh rm -rf a path derived from variables; a bad expansion
+# must never be able to wipe $HOME or /. Refuse anything that isn't a real (non-symlink)
+# directory living under ~/.config. A path that simply doesn't exist is a no-op success
+# (fresh install: there is no zsh.d/ to purge yet).
+safe_rmrf() {
+  local p="$1"
+  [[ -e "$p" || -L "$p" ]] || return 0
+  if [[ -n "$p" && "$p" == "$CONFIG_HOME/"* && -d "$p" && ! -L "$p" ]]; then
+    rm -rf "$p"
+    return 0
+  fi
+  warn "safe_rmrf refused unsafe target: $p"
+  return 1
 }
 
 # --- 1. snapshot ---
@@ -105,26 +118,58 @@ else
   log "znap present."
 fi
 
-# --- 5. symlinks ---
-log "Linking config…"
+# --- 5. copy config into place ---
+# Everything managed is a plain copy. Order matters: copy the self-contained driver/stub
+# files first, then do the one destructive step — purging and rebuilding zsh.d/ — LAST,
+# and atomically (build into zsh.d.tmp, then swap), so a mid-run failure never leaves a
+# half-populated fragment directory that a shell might source.
+log "Copying config into place…"
+mkdir -p "$CONFIG_HOME"
+
+# ~/.config/zsh must be a REAL directory, never a symlink. Adopt a machine migrating from
+# the old folder-symlink model by replacing the link with a real dir.
+if [[ -L "$ZDOTDIR_TARGET" ]]; then
+  rm "$ZDOTDIR_TARGET"
+  log "removed legacy folder symlink ~/.config/zsh"
+fi
 mkdir -p "$ZDOTDIR_TARGET"
 
-# $HOME/.zshenv -> repo/home/zshenv ; $HOME/.zprofile -> repo/home/zprofile
-link "$REPO/home/zshenv"   "$HOME/.zshenv"
-link "$REPO/home/zprofile" "$HOME/.zprofile"
-
-# Every tracked file in config/ (dotfiles + NN-*.zsh, excluding the .example template)
-# -> ~/.config/zsh/<name>
-shopt -s dotglob nullglob
-for f in "$REPO/config/"*; do
-  base="$(basename "$f")"
-  [[ "$base" == "99-local.zsh.example" ]] && continue
-  link "$f" "$ZDOTDIR_TARGET/$base"
+# Purge legacy per-file symlinks left at the ZDOTDIR root by the old model (fragments plus
+# the .zshrc/.zshenv driver links). Only symlinks are removed — real files (99-local.zsh,
+# runtime .zcompdump*/.zwc, .zsh_sessions/) are left untouched.
+for p in "$ZDOTDIR_TARGET"/*.zsh "$ZDOTDIR_TARGET/.zshrc" "$ZDOTDIR_TARGET/.zshenv"; do
+  if [[ -L "$p" ]]; then
+    rm "$p"
+    log "removed legacy symlink ${p/#$HOME/~}"
+  fi
 done
-shopt -u dotglob nullglob
 
-# starship config
-link "$REPO/starship/starship.toml" "$CONFIG_HOME/starship.toml"
+# $HOME stubs + driver files + starship (all self-contained copies).
+copy_file "$REPO/home/zshenv"          "$HOME/.zshenv"
+copy_file "$REPO/home/zprofile"        "$HOME/.zprofile"
+copy_file "$REPO/config/.zshrc"        "$ZDOTDIR_TARGET/.zshrc"
+copy_file "$REPO/config/.zshenv"       "$ZDOTDIR_TARGET/.zshenv"
+copy_file "$REPO/starship/starship.toml" "$CONFIG_HOME/starship.toml"
+
+# Rebuild zsh.d/ from scratch (pack and replace): a fragment deleted from config/ drops
+# out here on the next run. The glob matches only NN-*.zsh fragments, so .zshrc, .zshenv
+# and 99-local.zsh.example are excluded. 99-local.zsh lives at the ZDOTDIR root, never here.
+# Build into a temp dir first, then swap, so a mid-run failure never leaves zsh.d/ partial.
+ZSHD="$ZDOTDIR_TARGET/zsh.d"
+ZSHD_TMP="$ZDOTDIR_TARGET/zsh.d.tmp"
+safe_rmrf "$ZSHD_TMP"
+mkdir -p "$ZSHD_TMP"
+for src in "$REPO"/config/[0-9][0-9]-*.zsh; do
+  base="$(basename "$src")"
+  # Warn if the currently-installed copy was changed out from under the repo (pitfall #1).
+  if [[ -f "$ZSHD/$base" && "$(sha "$ZSHD/$base")" != "$(sha "$src")" ]]; then
+    warn "overwriting local changes in ${ZSHD/#$HOME/~}/$base (snapshot holds the prior copy)"
+  fi
+  cp -f "$src" "$ZSHD_TMP/$base"
+done
+safe_rmrf "$ZSHD"
+mv "$ZSHD_TMP" "$ZSHD"
+log "rebuilt ~/.config/zsh/zsh.d (fragments copied)"
 
 # --- 6. prime plugins ---
 # Only when we have a TTY: priming spawns an interactive shell that sources
