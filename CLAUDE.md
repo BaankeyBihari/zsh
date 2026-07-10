@@ -20,12 +20,14 @@ under `~/.config/zsh/`. Source order:
 1. `~/.zshenv` (→ `home/zshenv`) — XDG paths, `ZDOTDIR`, Homebrew PATH. Runs for **every** shell.
 2. `~/.zprofile` (→ `home/zprofile`) — login shells; intentionally minimal.
 3. `$ZDOTDIR/.zshenv` (→ `config/.zshenv`) — the granted `assume` alias; runs for every shell.
-4. `$ZDOTDIR/.zshrc` (→ `config/.zshrc`) — interactive driver. It just sources `NN-*.zsh`
-   fragments **in lexical filename order**, then `99-local.zsh` if present.
+4. `$ZDOTDIR/.zshrc` (→ `config/.zshrc`) — interactive driver. It sources the `NN-*.zsh`
+   fragments from `$ZDOTDIR/zsh.d/` **in lexical filename order**, then `99-local.zsh` if present.
 
 The fragments (`config/00-env.zsh` … `config/95-integrations.zsh`) own all real config:
 env → path → options → znap → plugins → completions → tools → aliases → functions → prompt →
-integrations. `99-local.zsh` (gitignored) is the last-loaded, machine-specific override layer.
+integrations. `install.sh` copies them into `~/.config/zsh/zsh.d/`. `99-local.zsh` (gitignored)
+sits at the `~/.config/zsh/` root — outside `zsh.d/`, so an install never purges it — and is the
+last-loaded, machine-specific override layer.
 
 ## How everything maps to the repo
 
@@ -39,14 +41,17 @@ integrations. `99-local.zsh` (gitignored) is the last-loaded, machine-specific o
 | The `$HOME` stub or `ZDOTDIR`    | `home/zshenv`                          |
 | Machine-specific / secret value  | `~/.config/zsh/99-local.zsh` (never committed) |
 
-Symlinks are per-file: `~/.config/zsh/` is a real directory of symlinks into `config/`, which
-is what lets `99-local.zsh` coexist with managed files.
+Config is **copied, not symlinked**: `install.sh` copies the driver/stub files into place and
+rebuilds `~/.config/zsh/zsh.d/` from scratch each run (deleting a fragment from `config/` drops
+it from `zsh.d/` on the next install). `~/.config/zsh/` is always a real directory; `99-local.zsh`
+and runtime artifacts live at its root, outside the purged `zsh.d/`. Tradeoff: an edit in this
+repo does not take effect until `install.sh` re-runs — `doctor.sh` reports any drift.
 
 ## Commands
 
 ```sh
-bin/install.sh              # apply repo state — snapshot → brew → znap → symlinks → doctor. Idempotent.
-bin/install.sh --no-brew    # config/symlinks only (skip Homebrew + Brewfile)
+bin/install.sh              # apply repo state — snapshot → brew → znap → copy config → doctor. Idempotent.
+bin/install.sh --no-brew    # config copy only (skip Homebrew + Brewfile)
 bin/update.sh               # upgrade installed packages — snapshot → brew update/upgrade → bundle → uv tool upgrade → doctor.
 bin/update.sh --greedy      # also upgrade self-updating casks; --no-cleanup keeps old versions
 bin/snapshot.sh             # manual snapshot before risky edits; prints the timestamp
@@ -66,8 +71,9 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
 
 ## Working rules for Claude
 
-- **Never edit `$HOME` or `~/.config/zsh/` directly.** They are symlinks/managed output.
-  Edit the repo, then run `bin/install.sh`.
+- **Never edit `$HOME` or `~/.config/zsh/` directly.** They are managed copies, rebuilt from
+  the repo. Edit the repo, then run `bin/install.sh` — edits do NOT take effect until it re-runs.
+  A hand-edit to an installed copy is drift: `doctor.sh` flags it and the next install clobbers it.
 - **`install.sh` snapshots before doing anything.** For edits applied by hand outside the
   installer, run `bin/snapshot.sh` first so rollback stays possible.
 - **`install.sh` provisions, `update.sh` upgrades — keep them separate.** `install.sh` only
@@ -86,8 +92,10 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
 
 - `~/.zshenv` + `~/.zprofile` are the only managed files in `$HOME`; everything else is gated
   through `ZDOTDIR`.
-- Every managed symlink resolves into this repo. `bin/doctor.sh` is authoritative and flags
-  any symlink that points elsewhere or any unmanaged file in `~/.config/zsh/`.
+- Every managed copy under `~/.config/zsh/` (and the `$HOME`/starship stubs) matches its repo
+  source byte-for-byte, and `zsh.d/` holds exactly the current `config/[0-9][0-9]-*.zsh` set.
+  `bin/doctor.sh` is authoritative and flags drift, plus any stale (dropped from the repo) or
+  missing fragment.
 - `snapshots/` is gitignored and is the rollback substrate — it works even if git history is
   unavailable. Each snapshot carries a `manifest.json` (origin paths, sha256, repo HEAD).
 

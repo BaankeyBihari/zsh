@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# doctor.sh — health check. Verifies symlinks point into this repo, required tools
-# exist, znap is present, and reports interactive startup time. Exit 0 = healthy.
+# doctor.sh — health check. Verifies the managed config copies match the repo (no drift,
+# no stale/missing fragments), required tools exist, znap is present, and reports
+# interactive startup time. Exit 0 = healthy.
 
 set -uo pipefail
 
@@ -15,48 +16,65 @@ bad()  { printf '  \033[1;31m✗\033[0m %s\n' "$*"; FAIL=$((FAIL+1)); }
 info() { printf '  \033[1;34mi\033[0m %s\n' "$*"; }
 head() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 
-# --- symlinks resolve into the repo ---
-head "Symlinks"
-check_link() {
-  local p="$1" tgt
-  tgt="$(readlink "$p" 2>/dev/null || true)"
-  if [[ -L "$p" && "$tgt" == "$REPO/"* ]]; then
-    ok "${p/#$HOME/~} -> repo${tgt#$REPO}"
-  elif [[ -L "$p" ]]; then
-    bad "${p/#$HOME/~} is a symlink but NOT into this repo ($(readlink "$p"))"
-  elif [[ -e "$p" ]]; then
-    bad "${p/#$HOME/~} exists but is not a symlink (unmanaged)"
+# --- managed config is a faithful copy of the repo ---
+head "Managed config"
+sha() { shasum -a 256 "$1" 2>/dev/null | awk '{print $1}'; }
+
+# Each managed copy must exist and match its repo source byte-for-byte. Drift means the
+# installed file was hand-edited (or the repo changed without a re-install).
+check_copy() {
+  local src="$1" dst="$2"
+  if [[ ! -e "$dst" ]]; then
+    bad "${dst/#$HOME/~} missing — re-run install.sh"
+  elif [[ -L "$dst" ]]; then
+    bad "${dst/#$HOME/~} is a symlink (legacy) — re-run install.sh"
+  elif [[ "$(sha "$dst")" == "$(sha "$src")" ]]; then
+    ok "${dst/#$HOME/~} matches repo"
   else
-    bad "${p/#$HOME/~} missing"
+    bad "${dst/#$HOME/~} drift — re-run install.sh"
   fi
 }
-check_link "$HOME/.zshenv"
-check_link "$HOME/.zprofile"
-check_link "$ZDOTDIR_TARGET/.zshrc"
-check_link "$ZDOTDIR_TARGET/.zshenv"
-check_link "$CONFIG_HOME/starship.toml"
-for f in "$REPO/config/"[0-9][0-9]-*.zsh; do
-  check_link "$ZDOTDIR_TARGET/$(basename "$f")"
-done
 
-# --- stray files in ~/.config/zsh not managed by the repo ---
-head "Stray files in ~/.config/zsh"
-stray=0
-if [[ -d "$ZDOTDIR_TARGET" ]]; then
-  shopt -s dotglob nullglob
-  for p in "$ZDOTDIR_TARGET"/*; do
-    base="$(basename "$p")"
-    case "$base" in
-      99-local.zsh|.zcompdump*|.zsh_history|history) continue ;;  # expected local artifacts
-    esac
-    if [[ ! -L "$p" ]]; then
-      info "unmanaged: $base (fine if intentional; not from repo)"
-      stray=$((stray+1))
+# ~/.config/zsh must be a real directory, never a symlink.
+if [[ -L "$ZDOTDIR_TARGET" ]]; then
+  bad "${ZDOTDIR_TARGET/#$HOME/~} is a symlink (legacy) — re-run install.sh"
+elif [[ ! -d "$ZDOTDIR_TARGET" ]]; then
+  bad "${ZDOTDIR_TARGET/#$HOME/~} missing — re-run install.sh"
+else
+  ok "${ZDOTDIR_TARGET/#$HOME/~} is a real directory"
+fi
+
+check_copy "$REPO/home/zshenv"            "$HOME/.zshenv"
+check_copy "$REPO/home/zprofile"          "$HOME/.zprofile"
+check_copy "$REPO/starship/starship.toml" "$CONFIG_HOME/starship.toml"
+check_copy "$REPO/config/.zshrc"          "$ZDOTDIR_TARGET/.zshrc"
+check_copy "$REPO/config/.zshenv"         "$ZDOTDIR_TARGET/.zshenv"
+
+# zsh.d/ fragments: the set of NN-*.zsh basenames must match config/ exactly, and each
+# common fragment must be an untouched copy. Flags missing (in repo, absent from zsh.d/)
+# and stale (in zsh.d/, dropped from repo) fragments.
+ZSHD="$ZDOTDIR_TARGET/zsh.d"
+if [[ ! -d "$ZSHD" ]]; then
+  bad "${ZSHD/#$HOME/~} missing — re-run install.sh"
+else
+  for src in "$REPO"/config/[0-9][0-9]-*.zsh; do
+    [[ -e "$src" ]] || continue          # no fragments in repo (shouldn't happen)
+    base="$(basename "$src")"
+    dst="$ZSHD/$base"
+    if [[ ! -e "$dst" ]]; then
+      bad "zsh.d/$base missing — re-run install.sh"
+    elif [[ "$(sha "$dst")" == "$(sha "$src")" ]]; then
+      ok "zsh.d/$base matches repo"
+    else
+      bad "zsh.d/$base drift — re-run install.sh"
     fi
   done
-  shopt -u dotglob nullglob
+  for dst in "$ZSHD"/[0-9][0-9]-*.zsh; do
+    [[ -e "$dst" ]] || continue          # empty zsh.d/
+    base="$(basename "$dst")"
+    [[ -e "$REPO/config/$base" ]] || bad "zsh.d/$base stale (not in repo) — re-run install.sh"
+  done
 fi
-[[ $stray -eq 0 ]] && ok "no unexpected stray files"
 
 # --- tools ---
 head "Tools"

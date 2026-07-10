@@ -1,4 +1,4 @@
-# ~/.zprofile — login shells. Symlink target = ~/zsh/home/zprofile.
+# ~/.zprofile — login shells. Copied to $HOME by bin/install.sh from ~/zsh/home/zprofile.
 #
 # Deliberately minimal: Homebrew PATH is set in ~/.zshenv (runs for every shell), and
 # interactive config lives under $ZDOTDIR. Login-only setup, if any, goes here.

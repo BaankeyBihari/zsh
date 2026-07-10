@@ -1,6 +1,7 @@
-# Copy this to 99-local.zsh (no .example suffix) to add machine-specific or secret
-# config. 99-local.zsh is gitignored and sourced LAST, so it can override any earlier
-# fragment.
+# Copy this to ~/.config/zsh/99-local.zsh (no .example suffix) to add machine-specific or
+# secret config. It lives at the ZDOTDIR root — OUTSIDE zsh.d/ — so install.sh never purges
+# it when it rebuilds the fragment directory. It is gitignored and sourced LAST, after every
+# zsh.d/ fragment, so it can override any of them.
 #
 # Examples:
 #

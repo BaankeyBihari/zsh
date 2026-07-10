@@ -12,22 +12,30 @@ exec zsh
 ```
 
 `install.sh` snapshots the current config, installs Homebrew + everything in the `Brewfile`
-(zsh, git, starship, fnm, pyenv, fzf, iTerm2, miniconda), clones znap, symlinks the config into
-place, then runs `doctor.sh`. It's idempotent — safe to re-run any time.
+(zsh, git, starship, fnm, pyenv, fzf, iTerm2, miniconda), clones znap, copies the config into
+place, then runs `doctor.sh`. It's idempotent — safe to re-run any time. Config is **copied**,
+not symlinked, so edits in this repo only take effect after you re-run `install.sh`.
 
 ## Layout
 
 ```
-home/      → ~/.zshenv, ~/.zprofile   (the only files placed in $HOME)
-config/    → ~/.config/zsh/*          (.zshrc driver + NN-*.zsh fragments)
+home/      → ~/.zshenv, ~/.zprofile        (the only files placed in $HOME)
+config/    → ~/.config/zsh/                 (.zshrc + .zshenv drivers copied to the root;
+             NN-*.zsh fragments copied into ~/.config/zsh/zsh.d/)
 starship/  → ~/.config/starship.toml
 Brewfile     provisioned tools/apps
 bin/         install · update · snapshot · rollback · uninstall · doctor
 snapshots/   timestamped backups (gitignored)
 ```
 
-`~/.zshenv` points zsh at `~/.config/zsh/`; `.zshrc` sources the `NN-*.zsh` fragments in order.
-To add config, drop a new numbered fragment — don't edit `.zshrc`.
+Everything under `~/.config/zsh/` is a plain copy of this repo. `install.sh` rebuilds
+`~/.config/zsh/zsh.d/` from scratch every run ("pack and replace"), so a fragment you delete
+from `config/` drops out on the next install — no dangling files left behind. Only
+`99-local.zsh` and runtime artifacts survive at the `~/.config/zsh/` root.
+
+`~/.zshenv` points zsh at `~/.config/zsh/`; `.zshrc` sources the `zsh.d/NN-*.zsh` fragments in
+order, then `99-local.zsh`. To add config, drop a new numbered fragment in `config/` and re-run
+`install.sh` — don't edit `.zshrc`.
 
 ## Everyday commands
 
@@ -66,8 +74,8 @@ last, so it overrides anything. Never put secrets or per-machine paths in tracke
 
 ## Extras (versioned here, not installed)
 
-Adjacent configs kept under version control that `install.sh` does **not** touch and nothing
-symlinks:
+Adjacent configs kept under version control that `install.sh` does **not** touch and never
+copies into place:
 
 - `extras/claude/GLOBAL_CLAUDE.md` — backup of my machine-global Claude Code rules
   (live source: `~/.claude/CLAUDE.md`; also a public

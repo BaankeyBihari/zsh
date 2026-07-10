@@ -7,7 +7,7 @@
 # apply (install.sh) stay fast and deterministic while upgrades remain an explicit choice.
 #
 # IMPORTANT: package upgrades are NOT covered by the snapshot/rollback substrate.
-# bin/snapshot.sh captures shell *config* only (dotfiles + symlinks), not brew/uv package
+# bin/snapshot.sh captures shell *config* only (dotfiles + managed copies), not brew/uv package
 # state. If a brew upgrade breaks something, recover with brew itself (reinstall a pinned
 # version, e.g. `brew install foo@1.2`), NOT bin/rollback.sh. The snapshot taken here
 # protects your config during the run; it does not roll packages back.

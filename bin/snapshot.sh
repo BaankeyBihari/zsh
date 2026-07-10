@@ -24,7 +24,8 @@ capture_file() {
   # $1 = source path, $2 = dest path, $3 = logical name for manifest
   local src="$1" dst="$2" name="$3"
   if [[ -e "$src" || -L "$src" ]]; then
-    # Preserve symlinks as-is so we know what was linked where.
+    # -RP: copy managed files as-is and preserve any legacy symlink as a symlink, so a
+    # snapshot records exactly what was on disk (post-migration these are plain copies).
     cp -RP "$src" "$dst"
     local checksum=""
     [[ -f "$src" && ! -L "$src" ]] && checksum="$(sha "$src")"
