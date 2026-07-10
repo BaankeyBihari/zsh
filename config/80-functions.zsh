@@ -55,3 +55,24 @@ rename-tab() {
   add-zsh-hook precmd _rename_tab_apply   # re-assert each prompt (idempotent)
   _rename_tab_apply                        # and apply right now
 }
+
+# benchmark — hyperfine with a sane default warmup so first-run cache effects don't
+# skew the comparison. All arguments pass straight through. hyperfine errors on a
+# repeated --warmup, so the default is added only when the caller didn't supply one.
+#
+#   benchmark 'zsh -i -c exit' 'bash -i -c exit'
+#   benchmark --warmup 10 'cmd'      # your value used; default 3 not added
+benchmark() {
+  if ! command -v hyperfine >/dev/null 2>&1; then
+    print -u2 "benchmark: hyperfine not installed (run bin/install.sh)"
+    return 127
+  fi
+  local a
+  for a in "$@"; do
+    if [[ "$a" == "-w" || "$a" == "--warmup" || "$a" == --warmup=* ]]; then
+      hyperfine "$@"
+      return
+    fi
+  done
+  hyperfine --warmup 3 "$@"
+}
