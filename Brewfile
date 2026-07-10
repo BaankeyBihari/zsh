@@ -20,6 +20,7 @@ brew "pre-commit"   # manage git pre-commit hooks (.pre-commit-config.yaml)
 
 # Productivity
 brew "fzf"
+brew "hyperfine"   # CLI benchmarking; `benchmark` wrapper in config/80-functions.zsh
 brew "tree"
 brew "zoxide"   # smarter cd; provides `z`/`zi` (+ `j` alias) — init in config/60-tools.zsh
 
