@@ -13,8 +13,8 @@ gCloner() {
 # and xterm-compatible emulators honour. printf (not print -P) so the title is
 # taken literally — no prompt/% expansion of user input.
 #
-# iTerm2's shell integration re-derives the title every prompt, which would wipe a
-# one-shot escape. So we register a precmd hook that re-asserts the chosen title
+# Some terminals/shell integrations re-derive the title every prompt, which would wipe
+# a one-shot escape. So we register a precmd hook that re-asserts the chosen title
 # until you clear it. Call with no argument to release the tab back to the default.
 #
 #   rename-tab deploy      # tab now reads "deploy" and stays that way

@@ -26,9 +26,9 @@ under `~/.config/zsh/`. Source order:
 4. `$ZDOTDIR/.zshrc` (→ `config/.zshrc`) — interactive driver. It sources the `NN-*.zsh`
    fragments from `$ZDOTDIR/zsh.d/` **in lexical filename order**, then `99-local.zsh` if present.
 
-The fragments (`config/00-env.zsh` … `config/95-integrations.zsh`) own all real config:
-env → path → options → znap → plugins → completions → tools → aliases → functions → prompt →
-integrations. `install.sh` copies them into `~/.config/zsh/zsh.d/`. `99-local.zsh` (gitignored)
+The fragments (`config/00-env.zsh` … `config/90-prompt.zsh`) own all real config:
+env → path → options → znap → plugins → completions → tools → aliases → functions → prompt.
+`install.sh` copies them into `~/.config/zsh/zsh.d/`. `99-local.zsh` (gitignored)
 sits at the `~/.config/zsh/` root — outside `zsh.d/`, so an install never purges it — and is the
 last-loaded, machine-specific override layer.
 

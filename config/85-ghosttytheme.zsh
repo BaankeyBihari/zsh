@@ -1,8 +1,8 @@
 # ghosttytheme — Ghostty color-scheme switcher.
 #
 # Writes `theme = <name>` to ~/.config/ghostty/config and sends SIGUSR2 so all
-# open Ghostty windows reload. Unlike itermtheme, changes persist across
-# restarts (Ghostty has no stateless palette-escape equivalent).
+# open Ghostty windows reload. Changes persist across restarts (Ghostty has no
+# stateless palette-escape equivalent).
 #
 #   ghosttytheme <name>    apply a theme by name (case-insensitive prefix ok)
 #   ghosttytheme           fzf picker with live preview as you navigate
