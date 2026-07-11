@@ -22,3 +22,17 @@ fi
 # NOT wired. HOMEBREW_PREFIX comes from brew shellenv in ~/.zshenv.
 [[ -r "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh" ]] && \
   source "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh"
+
+# fzf look & feel + listers. rg respects .gitignore, so Ctrl-T doesn't drown in
+# node_modules; falls back to fzf's built-in walker when rg is absent (guard below).
+# Previews: bat for files (Ctrl-T), eza tree for directories (Alt-C) — both degrade
+# to no preview if the tool is missing, since fzf just shows the failed command.
+export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+if command -v rg >/dev/null 2>&1; then
+  export FZF_DEFAULT_COMMAND="rg --files --hidden --glob '!.git'"
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+fi
+command -v bat >/dev/null 2>&1 && \
+  export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+command -v eza >/dev/null 2>&1 && \
+  export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always {}'"
