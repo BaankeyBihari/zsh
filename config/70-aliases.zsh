@@ -2,11 +2,14 @@
 # without eza the plain-ls fallbacks below stay in effect. No --color=always anywhere:
 # eza's auto-detection keeps pipes clean. Real tree stays reachable as `command tree`.
 if command -v eza >/dev/null 2>&1; then
-  alias ls='eza --icons --group-directories-first'
-  alias ll='eza -lh --icons --git --group-directories-first'
-  alias la='eza -lah --icons --group-directories-first'
-  alias tree='eza --tree --icons'
-  alias l='eza --icons --classify'          # ≈ ls -CF (grid + type suffixes)
+  # --icons=auto / --classify=auto (with the =): both flags take an OPTIONAL value,
+  # so the bare form followed by a path swallows the path as its value
+  # (`tree bin/` → "invalid value 'bin/' for '--icons'").
+  alias ls='eza --icons=auto --group-directories-first'
+  alias ll='eza -lh --icons=auto --git --group-directories-first'
+  alias la='eza -lah --icons=auto --group-directories-first'
+  alias tree='eza --tree --icons=auto'
+  alias l='eza --icons=auto --classify=auto'   # ≈ ls -CF (grid + type suffixes)
 else
   alias ll='ls -la'
   alias la='ls -A'
