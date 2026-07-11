@@ -92,9 +92,9 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
   A bare `tree` passed while `tree bin/` was broken: eza flags with optional values
   (`--icons`, `--classify`) swallow an adjacent path unless pinned with `=auto`. Test each
   new alias/function at least once with a trailing path/argument.
-- **Heavy/optional tooling stays lazy** (e.g. conda via `loadconda`) so it doesn't tax startup.
-  Same discipline for integrations: prefer sourcing static files (fzf keybindings) over
-  `eval "$(tool init)"` subprocesses where an option exists.
+- **Heavy/optional tooling stays lazy or out entirely** so it doesn't tax startup. Prefer
+  sourcing static files (fzf keybindings) over `eval "$(tool init)"` subprocesses where an
+  option exists.
 - **Some tool config lives outside this repo's substrate**: delta is wired as git pager via
   `git config --global` (`~/.gitconfig`) — not snapshot-protected; undo with
   `git config --global --unset`.
@@ -126,6 +126,6 @@ global rules still apply via the live file, as in any repo — this copy is just
 
 ## Platform assumptions
 
-macOS + Apple Silicon (`/opt/homebrew`). conda defaults to `miniconda` via the Brewfile.
-Porting to Intel/Linux means generalizing the `brew shellenv` paths in `home/zshenv` and the
-conda search paths in `config/80-functions.zsh`.
+macOS + Apple Silicon (`/opt/homebrew`). Python tooling is pyenv + uv (conda was sunset in
+2026-07). Porting to Intel/Linux means generalizing the `brew shellenv` paths in
+`home/zshenv`.

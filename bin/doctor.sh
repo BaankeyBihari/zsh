@@ -81,11 +81,6 @@ head "Tools"
 for t in zsh git starship fnm pyenv; do
   if command -v "$t" >/dev/null 2>&1; then ok "$t: $(command -v "$t")"; else bad "$t not found"; fi
 done
-if [[ -d /opt/homebrew/Caskroom/miniconda || -d /opt/homebrew/anaconda3 ]]; then
-  ok "conda distribution present (use 'loadconda')"
-else
-  bad "no conda distribution found"
-fi
 
 # --- znap ---
 head "znap"
