@@ -49,10 +49,9 @@ brew "stern"
 # Local LLMs
 brew "ollama"
 
-# Terminal + Python distribution
+# Terminal
 cask "ghostty"    # config/85-ghosttytheme.zsh drives it — must be provisioned
 cask "iterm2"
-cask "miniconda"
 
 # Nerd Font — required glyphs for the starship pastel-powerline prompt.
 # Set iTerm2 font to "MesloLGS Nerd Font" (Profiles → Text).
