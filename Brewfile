@@ -19,8 +19,12 @@ brew "gh"
 brew "pre-commit"   # manage git pre-commit hooks (.pre-commit-config.yaml)
 
 # Productivity
+brew "bat"         # cat with syntax highlighting; guarded `cat` alias in 70-aliases.zsh
+brew "delta"       # syntax-highlighted git pager (wired via git config --global)
+brew "eza"         # modern ls; guarded ls/ll/la/tree aliases in 70-aliases.zsh
 brew "fzf"
 brew "hyperfine"   # CLI benchmarking; `benchmark` wrapper in config/80-functions.zsh
+brew "ripgrep"     # rg; also drives FZF_DEFAULT_COMMAND in config/60-tools.zsh
 brew "tree"
 brew "zoxide"   # smarter cd; provides `z`/`zi` (+ `j` alias) — init in config/60-tools.zsh
 
