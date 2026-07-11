@@ -50,6 +50,14 @@ check_copy "$REPO/starship/starship.toml" "$CONFIG_HOME/starship.toml"
 check_copy "$REPO/config/.zshrc"          "$ZDOTDIR_TARGET/.zshrc"
 check_copy "$REPO/config/.zshenv"         "$ZDOTDIR_TARGET/.zshenv"
 
+# $HOME must hold no zsh config beyond the managed stubs. A leftover pre-migration
+# ~/.zshrc is ignored while ZDOTDIR is set, but would take effect if ~/.zshenv were lost.
+if [[ -e "$HOME/.zshrc" || -L "$HOME/.zshrc" ]]; then
+  bad "~/.zshrc present (legacy, unmanaged) — re-run install.sh to remove it"
+else
+  ok "no stray ~/.zshrc in \$HOME"
+fi
+
 # zsh.d/ fragments: the set of NN-*.zsh basenames must match config/ exactly, and each
 # common fragment must be an untouched copy. Flags missing (in repo, absent from zsh.d/)
 # and stale (in zsh.d/, dropped from repo) fragments.

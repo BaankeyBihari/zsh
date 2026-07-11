@@ -151,6 +151,18 @@ copy_file "$REPO/config/.zshrc"        "$ZDOTDIR_TARGET/.zshrc"
 copy_file "$REPO/config/.zshenv"       "$ZDOTDIR_TARGET/.zshenv"
 copy_file "$REPO/starship/starship.toml" "$CONFIG_HOME/starship.toml"
 
+# A pre-migration ~/.zshrc is dead code while ZDOTDIR points at ~/.config/zsh, but it
+# would silently take effect again if ~/.zshenv were ever lost. Remove it — the snapshot
+# taken at the top of this run captured it, so rollback.sh can restore it.
+if [[ -f "$HOME/.zshrc" || -L "$HOME/.zshrc" ]]; then
+  if [[ $DO_SNAPSHOT -eq 1 ]]; then
+    rm -f "$HOME/.zshrc"
+    log "removed legacy ~/.zshrc (snapshot holds the prior copy)"
+  else
+    warn "legacy ~/.zshrc present; leaving it in place (--no-snapshot, so no backup exists)"
+  fi
+fi
+
 # Rebuild zsh.d/ from scratch (pack and replace): a fragment deleted from config/ drops
 # out here on the next run. The glob matches only NN-*.zsh fragments, so .zshrc, .zshenv
 # and 99-local.zsh.example are excluded. 99-local.zsh lives at the ZDOTDIR root, never here.
