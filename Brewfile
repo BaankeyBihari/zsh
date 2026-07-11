@@ -51,10 +51,9 @@ brew "ollama"
 
 # Terminal
 cask "ghostty"    # config/85-ghosttytheme.zsh drives it — must be provisioned
-cask "iterm2"
 
 # Nerd Font — required glyphs for the starship pastel-powerline prompt.
-# Set iTerm2 font to "MesloLGS Nerd Font" (Profiles → Text).
+# Ghostty: set `font-family = MesloLGS Nerd Font` in ~/.config/ghostty/config.
 cask "font-meslo-lg-nerd-font"
 
 # Apps

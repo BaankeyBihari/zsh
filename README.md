@@ -12,7 +12,7 @@ exec zsh
 ```
 
 `install.sh` snapshots the current config, installs Homebrew + everything in the `Brewfile`
-(zsh, git, starship, fnm, pyenv, fzf, ripgrep, eza, bat, fd, delta, hyperfine, Ghostty, iTerm2,
+(zsh, git, starship, fnm, pyenv, fzf, ripgrep, eza, bat, fd, delta, hyperfine, Ghostty,
 …), clones znap, copies the config into place, then runs `doctor.sh`. It's
 idempotent — safe to re-run any time. Config is **copied**, not symlinked, so edits in this
 repo only take effect after you re-run `install.sh`.
