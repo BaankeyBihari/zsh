@@ -12,9 +12,10 @@ exec zsh
 ```
 
 `install.sh` snapshots the current config, installs Homebrew + everything in the `Brewfile`
-(zsh, git, starship, fnm, pyenv, fzf, iTerm2, miniconda), clones znap, copies the config into
-place, then runs `doctor.sh`. It's idempotent — safe to re-run any time. Config is **copied**,
-not symlinked, so edits in this repo only take effect after you re-run `install.sh`.
+(zsh, git, starship, fnm, pyenv, fzf, ripgrep, eza, bat, fd, delta, hyperfine, Ghostty, iTerm2,
+miniconda, …), clones znap, copies the config into place, then runs `doctor.sh`. It's
+idempotent — safe to re-run any time. Config is **copied**, not symlinked, so edits in this
+repo only take effect after you re-run `install.sh`.
 
 ## Layout
 
@@ -36,6 +37,24 @@ from `config/` drops out on the next install — no dangling files left behind. 
 `~/.zshenv` points zsh at `~/.config/zsh/`; `.zshrc` sources the `zsh.d/NN-*.zsh` fragments in
 order, then `99-local.zsh`. To add config, drop a new numbered fragment in `config/` and re-run
 `install.sh` — don't edit `.zshrc`.
+
+## What the shell gives you
+
+- **Plugins** (znap): zsh-autosuggestions (history + completion strategy),
+  zsh-syntax-highlighting.
+- **fzf keybindings**: `Ctrl-R` fuzzy history, `Ctrl-T` fuzzy file insert (ripgrep-listed,
+  bat preview), `Alt-C` fuzzy cd (eza tree preview).
+- **Modern CLI aliases** (guarded — fall back to classic tools when absent): `ls`/`ll`/`la`/
+  `l`/`tree` → eza with icons, `cat` → bat. `find` is deliberately NOT aliased to fd
+  (incompatible CLIs); use `fd` directly.
+- **git**: delta as pager (syntax-highlighted diffs; configured in `~/.gitconfig`, outside
+  this repo's snapshots).
+- **Functions** (`config/80-functions.zsh`): `loadconda` (lazy conda), `gCloner`,
+  `rename-tab`, `benchmark` (hyperfine with default warmup), `logit` (tee a command's
+  output to `~/.cache/captures/*.md` — self-prunes after 30 days; `logit -l` prints the
+  newest path). Plus `ghosttytheme` (`config/85-ghosttytheme.zsh`) — Ghostty color-scheme
+  switcher with fzf picker.
+- **Navigation**: zoxide (`z`/`zi`, `j` alias).
 
 ## Everyday commands
 

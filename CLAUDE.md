@@ -9,7 +9,10 @@ Goal: a fresh machine becomes fully provisioned by running one script, every cha
 snapshot-protected, and rollback is always one command away. **All shell config is edited
 here and applied via `bin/install.sh` — never edited directly in `$HOME` or `~/.config/zsh/`.**
 
-Stack: plain zsh + **starship** (prompt) + **znap** (plugin manager). No Oh My Zsh.
+Stack: plain zsh + **starship** (prompt) + **znap** (plugin manager, loading
+zsh-autosuggestions + zsh-syntax-highlighting). No Oh My Zsh. fzf drives Ctrl-R/Ctrl-T/Alt-C
+(wired in `config/60-tools.zsh`); modern CLI replacements (eza, bat, ripgrep, fd, delta) are
+provisioned via the Brewfile with guarded aliases in `config/70-aliases.zsh`.
 
 ## Load model
 
@@ -58,7 +61,7 @@ bin/snapshot.sh             # manual snapshot before risky edits; prints the tim
 bin/rollback.sh             # list snapshots
 bin/rollback.sh <ts>        # restore a snapshot (or `latest`)
 bin/uninstall.sh            # = rollback.sh latest
-bin/doctor.sh               # health check: symlinks, tools, znap, startup time. Exit 0 = healthy.
+bin/doctor.sh               # health check: managed-copy drift/stale/missing, tools, znap, startup time. Exit 0 = healthy.
 ```
 
 Verification helpers:
@@ -85,7 +88,16 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
   Pick the prefix by category (see the load-order list above); files load in lexical order, so
   `zsh-syntax-highlighting` must stay last in `40-plugins.zsh`.
 - **After any change, run `bin/doctor.sh`** and check `time zsh -i -c exit` hasn't regressed.
+- **Smoke-test aliases/functions with representative arguments, not just bare invocations.**
+  A bare `tree` passed while `tree bin/` was broken: eza flags with optional values
+  (`--icons`, `--classify`) swallow an adjacent path unless pinned with `=auto`. Test each
+  new alias/function at least once with a trailing path/argument.
 - **Heavy/optional tooling stays lazy** (e.g. conda via `loadconda`) so it doesn't tax startup.
+  Same discipline for integrations: prefer sourcing static files (fzf keybindings) over
+  `eval "$(tool init)"` subprocesses where an option exists.
+- **Some tool config lives outside this repo's substrate**: delta is wired as git pager via
+  `git config --global` (`~/.gitconfig`) — not snapshot-protected; undo with
+  `git config --global --unset`.
 - The canonical "I broke it" loop: `bin/rollback.sh <prev-ts>` → fix repo → `bin/install.sh`.
 
 ## Invariants
