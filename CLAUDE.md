@@ -98,12 +98,17 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
 - **Some tool config lives outside this repo's substrate**: delta is wired as git pager via
   `git config --global` (`~/.gitconfig`) — not snapshot-protected; undo with
   `git config --global --unset`.
+- **Docs ship with the change.** If a change alters anything CLAUDE.md or README.md
+  describes — commands/flags, fragments, provisioned tools, functions/aliases, invariants,
+  the load model — update both files in the same commit. Nothing automated checks docs
+  (doctor/pre-commit only verify code), so drift is caught only here.
 - The canonical "I broke it" loop: `bin/rollback.sh <prev-ts>` → fix repo → `bin/install.sh`.
 
 ## Invariants
 
 - `~/.zshenv` + `~/.zprofile` are the only managed files in `$HOME`; everything else is gated
-  through `ZDOTDIR`.
+  through `ZDOTDIR`. Enforced: `install.sh` deletes a legacy `~/.zshrc` (the run's snapshot
+  keeps a copy; skipped under `--no-snapshot`), and `doctor.sh` fails while one is present.
 - Every managed copy under `~/.config/zsh/` (and the `$HOME`/starship stubs) matches its repo
   source byte-for-byte, and `zsh.d/` holds exactly the current `config/[0-9][0-9]-*.zsh` set.
   `bin/doctor.sh` is authoritative and flags drift, plus any stale (dropped from the repo) or
