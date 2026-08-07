@@ -82,6 +82,24 @@ _logit_label() {  # $1 = STDOUT|STDERR
   [[ -n "$line" ]] && { strftime -s ts '%F %T'; print -r -- "[$ts] [$1] $line" }
 }
 
+# toggle-headroom — flip the shell between routed (through the local Headroom
+# proxy) and direct. Toggles ANTHROPIC_BASE_URL / OPENAI_BASE_URL based on
+# whether ANTHROPIC_BASE_URL is currently set — no argument needed.
+#
+#   toggle-headroom   # unset → export both (port from $HEADROOM_PORT, default 8787)
+#   toggle-headroom   # set → unset both
+toggle-headroom() {
+  if [[ -n "$ANTHROPIC_BASE_URL" ]]; then
+    unset ANTHROPIC_BASE_URL OPENAI_BASE_URL
+    echo "headroom: off"
+  else
+    local port="${HEADROOM_PORT:-8787}"
+    export ANTHROPIC_BASE_URL="http://127.0.0.1:$port"
+    export OPENAI_BASE_URL="http://127.0.0.1:$port/v1"
+    echo "headroom: on ($ANTHROPIC_BASE_URL)"
+  fi
+}
+
 logit() {
   local keep_days=30
   local dir="${XDG_CACHE_HOME:-$HOME/.cache}/captures"

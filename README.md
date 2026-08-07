@@ -13,7 +13,8 @@ exec zsh
 
 `install.sh` snapshots the current config, installs Homebrew + everything in the `Brewfile`
 (zsh, git, starship, fnm, pyenv, fzf, ripgrep, eza, bat, fd, delta, hyperfine, Ghostty,
-…), clones znap, copies the config into place, then runs `doctor.sh`. It's
+…), clones znap, copies the config into place (removing any stray pre-migration `~/.zshrc` —
+the snapshot keeps a copy), then runs `doctor.sh`. It's
 idempotent — safe to re-run any time. Config is **copied**, not symlinked, so edits in this
 repo only take effect after you re-run `install.sh`.
 
@@ -51,9 +52,12 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
   this repo's snapshots).
 - **Functions** (`config/80-functions.zsh`): `gCloner`,
   `rename-tab`, `benchmark` (hyperfine with default warmup), `logit` (tee a command's
-  output to `~/.cache/captures/*.md` — self-prunes after 30 days; `logit -l` prints the
-  newest path). Plus `ghosttytheme` (`config/85-ghosttytheme.zsh`) — Ghostty color-scheme
-  switcher with fzf picker.
+  output to `~/.cache/captures/*.md`, each line timestamped and labelled
+  `[STDOUT]`/`[STDERR]` — self-prunes after 30 days; `logit -p` for the plain unlabelled
+  merge, `logit -l` prints the newest path), `toggle-headroom` (flips
+  `ANTHROPIC_BASE_URL`/`OPENAI_BASE_URL` to route through the local Headroom proxy,
+  port from `$HEADROOM_PORT` default 8787; call again to unset). Plus `ghosttytheme`
+  (`config/85-ghosttytheme.zsh`) — Ghostty color-scheme switcher with fzf picker.
 - **Navigation**: zoxide (`z`/`zi`, `j` alias).
 
 ## Everyday commands
