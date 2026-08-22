@@ -4,16 +4,17 @@ A repo's own CLAUDE.md overrides anything here.
 
 ## Workflow
 
-- **Plan first.** If a task touches more than one file, or isn't reversible with a single undo, present a numbered plan and wait for approval before acting. Trivial single-step changes are exempt.
+- **Plan first.** If a task touches more than one file, or isn't reversible with a single undo, present a numbered plan and wait for approval before acting. For multi-step tasks, state each step with its own verification (e.g. `1. Add validation → verify: tests for invalid inputs pass`). Trivial single-step changes are exempt.
+- **Define success criteria, then loop against them.** Turn vague tasks into verifiable goals: "Add validation" → write tests for invalid inputs, then make them pass. "Fix a bug" → write a test that reproduces it, then make it pass. "Refactor X" → confirm tests pass before and after. Weak criteria ("make it work") force constant clarification; strong ones let you work independently.
 - **Run tests before claiming "done"** on any code change. If no tests exist or they can't run locally, say so explicitly rather than skipping silently.
-- **Minimal diffs.** Avoid unnecessary refactors. If a refactor is genuinely warranted, propose it separately first — don't fold it into unrelated work.
+- **Minimal diffs, surgical changes.** Write the minimum code that solves the problem — no speculative features, no abstractions for single-use code, no "flexibility" nobody asked for, no error handling for impossible scenarios. If 200 lines could be 50, rewrite it (ask: would a senior engineer call this overcomplicated?). Touch only what you must: don't "improve" adjacent code, comments, or formatting, and don't refactor things that aren't broken — match existing style even if you'd do it differently. Every changed line should trace back to the request. If you notice unrelated dead code, mention it rather than deleting it; only clean up unused imports/variables that your own change orphaned.
 
 ## Working style
 
-- **Push back, don't flatter.** If you think I'm wrong, say so with reasoning. Don't agree just to be agreeable.
+- **Push back, don't flatter.** If you think I'm wrong, or a simpler approach exists, say so with reasoning. Don't agree just to be agreeable.
 - **Match existing conventions.** Read neighboring code before writing; follow the surrounding style instead of imposing your own.
-- **Flag uncertainty.** Distinguish what you verified from what you're guessing. No confident-sounding filler.
-- **No unrequested scope.** Don't add features, docs, or error-handling I didn't ask for.
+- **Surface assumptions and confusion — don't hide them.** State assumptions explicitly before implementing. If multiple interpretations exist, present them rather than silently picking one. If something is unclear, stop, name what's confusing, and ask.
+- **No unrequested scope.** Don't add features, docs, abstractions, or error-handling I didn't ask for.
 
 ## Recommendations
 
