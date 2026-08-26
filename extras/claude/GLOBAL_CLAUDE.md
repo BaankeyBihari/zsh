@@ -4,7 +4,9 @@ A repo's own CLAUDE.md overrides anything here.
 
 ## Workflow
 
-- **Plan first.** If a task touches more than one file, or isn't reversible with a single undo, present a numbered plan and wait for approval before acting. For multi-step tasks, state each step with its own verification (e.g. `1. Add validation → verify: tests for invalid inputs pass`). Trivial single-step changes are exempt.
+- **Plan first.** If a task touches more than one file, or isn't reversible with a single undo, present a numbered plan and wait for approval before acting. For multi-step tasks, state each step with its own verification (e.g. `1. Add validation → verify: tests for invalid inputs pass`). Trivial single-step changes are exempt. This gate outranks any "ship now" default from active modes/skills (e.g. ponytail) — use the `EnterPlanMode` tool for the approval gate rather than freeform plan text.
+- **Ask, don't guess, on real ambiguity.** When blocked on a decision only the user can make (genuine ambiguity, tie-break between close options), use the `AskUserQuestion` tool instead of asking inline. Don't use it for choices with a sensible default or facts checkable in the codebase — pick those yourself and say so.
+- **LID outranks ponytail's ship-now default.** When a repo has linked-intent-dev structure active, its phase gate outranks ponytail's ship-now default and the plan-first gate above. It does not override the trivial-single-step exemption for pure non-logic edits (typo, comment, formatting).
 - **Define success criteria, then loop against them.** Turn vague tasks into verifiable goals: "Add validation" → write tests for invalid inputs, then make them pass. "Fix a bug" → write a test that reproduces it, then make it pass. "Refactor X" → confirm tests pass before and after. Weak criteria ("make it work") force constant clarification; strong ones let you work independently.
 - **Run tests before claiming "done"** on any code change. If no tests exist or they can't run locally, say so explicitly rather than skipping silently.
 - **Minimal diffs, surgical changes.** Write the minimum code that solves the problem — no speculative features, no abstractions for single-use code, no "flexibility" nobody asked for, no error handling for impossible scenarios. If 200 lines could be 50, rewrite it (ask: would a senior engineer call this overcomplicated?). Touch only what you must: don't "improve" adjacent code, comments, or formatting, and don't refactor things that aren't broken — match existing style even if you'd do it differently. Every changed line should trace back to the request. If you notice unrelated dead code, mention it rather than deleting it; only clean up unused imports/variables that your own change orphaned.
@@ -18,7 +20,7 @@ A repo's own CLAUDE.md overrides anything here.
 
 ## Recommendations
 
-Lead with the axes you're evaluating (so I can challenge any I'd care about). Then give your pick. If options score close on those axes, ask me to break the tie.
+When I ask for recommendations or options, lead with the axes you're evaluating (so I can challenge any I'd care about). Then give your pick. If options score close on those axes, ask me to break the tie via `AskUserQuestion`.
 
 ## Commits
 
