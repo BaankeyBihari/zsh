@@ -100,6 +100,29 @@ toggle-headroom() {
   fi
 }
 
+# claude — wrapper that routes the CLI through the local Headroom proxy. Unlike
+# toggle-headroom (whole shell, manual), this guards claude specifically: it
+# checks the proxy is ready and sets ANTHROPIC_BASE_URL for the claude process
+# only (OPENAI_BASE_URL is a codex concern, not claude's). Proxy down => print
+# `headroom install status` and abort (never launches claude unrouted). Escape
+# hatch: HEADROOM_OFF=1 claude  runs direct, no check. --version/--help skip it.
+claude() {
+  [[ -n "$HEADROOM_OFF" ]] && { command claude "$@"; return; }
+  case "$1" in
+    -v|--version|-h|--help) command claude "$@"; return ;;
+  esac
+  local port="${HEADROOM_PORT:-8787}"
+  if ! curl -fsS --connect-timeout 1 --max-time 2 "http://127.0.0.1:$port/readyz" >/dev/null 2>&1; then
+    print -ru2 -- "headroom proxy down (http://127.0.0.1:$port/readyz) — claude launch aborted"
+    print -ru2 -- "--- headroom install status ---"
+    headroom install status >&2
+    print -ru2 -- "fix: 'headroom install start' if stopped, or"
+    print -ru2 -- "     'headroom install apply --preset persistent-service --providers auto' if not deployed"
+    return 1
+  fi
+  ANTHROPIC_BASE_URL="http://127.0.0.1:$port" command claude "$@"
+}
+
 logit() {
   local keep_days=30
   local dir="${XDG_CACHE_HOME:-$HOME/.cache}/captures"

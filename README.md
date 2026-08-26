@@ -55,9 +55,14 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
   output to `~/.cache/captures/*.md`, each line timestamped and labelled
   `[STDOUT]`/`[STDERR]` — self-prunes after 30 days; `logit -p` for the plain unlabelled
   merge, `logit -l` prints the newest path), `toggle-headroom` (flips
-  `ANTHROPIC_BASE_URL`/`OPENAI_BASE_URL` to route through the local Headroom proxy,
-  port from `$HEADROOM_PORT` default 8787; call again to unset). Plus `ghosttytheme`
-  (`config/85-ghosttytheme.zsh`) — Ghostty color-scheme switcher with fzf picker.
+  `ANTHROPIC_BASE_URL`/`OPENAI_BASE_URL` for the whole shell to route through the
+  local Headroom proxy, port from `$HEADROOM_PORT` default 8787; call again to
+  unset), `claude` (wrapper: checks the proxy's `/readyz`, then routes the
+  `claude` CLI through it via `ANTHROPIC_BASE_URL`; aborts with `headroom install
+  status` if the proxy is down — `HEADROOM_OFF=1 claude` bypasses,
+  `--version`/`--help` skip the check). Plus
+  `ghosttytheme` (`config/85-ghosttytheme.zsh`) — Ghostty color-scheme switcher
+  with fzf picker.
 - **Navigation**: zoxide (`z`/`zi`, `j` alias).
 
 ## Everyday commands
