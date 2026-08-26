@@ -49,6 +49,10 @@ brew "stern"
 # Local LLMs
 brew "ollama"
 
+# Infra
+tap "hashicorp/tap"
+brew "hashicorp/tap/terraform"
+
 # Terminal
 cask "ghostty"    # config/85-ghosttytheme.zsh drives it — must be provisioned
 
