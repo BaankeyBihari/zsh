@@ -92,16 +92,22 @@ if [[ $DO_BREW -eq 1 ]]; then
 
   # --- 3b. uv tools ---
   # Python CLIs with no Homebrew formula, installed via uv (provisioned above).
+  # Each entry is "<uv-package>:<cli-binary>" — equal except where the package
+  # publishes a differently-named command.
   # gita: manage many git repos at once.
   # nox: task automation / test matrices across Python versions.
-  # virtualenv: standalone venv creator. `uv tool install` is idempotent.
+  # virtualenv: standalone venv creator.
+  # headroom-ai[all]: local Anthropic/OpenAI proxy that compresses context, with
+  #   all optional extras (ships the `headroom` command; see toggle-headroom).
+  # `uv tool install` is idempotent.
   if command -v uv >/dev/null 2>&1; then
-    for tool in gita nox virtualenv; do
-      if command -v "$tool" >/dev/null 2>&1; then
-        log "uv tool present: $tool"
+    for entry in "gita:gita" "nox:nox" "virtualenv:virtualenv" "headroom-ai[all]:headroom"; do
+      pkg="${entry%%:*}"; cli="${entry##*:}"
+      if command -v "$cli" >/dev/null 2>&1; then
+        log "uv tool present: $pkg"
       else
-        log "Installing uv tool: $tool"
-        uv tool install "$tool"
+        log "Installing uv tool: $pkg"
+        uv tool install "$pkg"
       fi
     done
   fi
