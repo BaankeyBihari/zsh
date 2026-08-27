@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# update.sh — freshen what's already installed: Homebrew packages and uv tools.
+# update.sh — freshen what's already installed: Homebrew packages, uv tools, cargo tools.
 #
 # Distinct from install.sh on purpose: install PROVISIONS (bring the machine up to match
 # the repo — installs what's missing, never upgrades). update UPGRADES (pull newer
@@ -12,7 +12,7 @@
 # version, e.g. `brew install foo@1.2`), NOT bin/rollback.sh. The snapshot taken here
 # protects your config during the run; it does not roll packages back.
 #
-# Flow: snapshot → brew update → brew upgrade → brew bundle → uv tool upgrade → doctor.
+# Flow: snapshot → brew update → brew upgrade → brew bundle → uv tool upgrade → cargo tool upgrade → doctor.
 #
 # Flags:
 #   --no-snapshot   skip the config safety snapshot (NOT recommended)
@@ -79,7 +79,15 @@ else
   warn "uv not found; skipping uv tool upgrades."
 fi
 
-# --- 4. verify ---
+# --- 4. cargo tools ---
+if command -v cargo >/dev/null 2>&1 && cargo install-update --help >/dev/null 2>&1; then
+  log "Upgrading cargo tools…"
+  cargo install-update --all || warn "cargo install-update reported issues."
+else
+  warn "cargo-update not found; skipping cargo tool upgrades."
+fi
+
+# --- 5. verify ---
 log "Running doctor…"
 bash "$REPO/bin/doctor.sh" || warn "doctor reported issues (see above)."
 

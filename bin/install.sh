@@ -2,7 +2,7 @@
 # install.sh — apply this repo's shell config to the machine. Idempotent: re-running
 # only does work where reality differs from the desired state.
 #
-# Flow: snapshot → Homebrew → Brewfile → uv tools → znap → copy config → prime → doctor.
+# Flow: snapshot → Homebrew → Brewfile → uv tools → cargo tools → znap → copy config → prime → doctor.
 #
 # Flags:
 #   --no-brew          skip Homebrew + Brewfile steps (config copy only)
@@ -110,6 +110,18 @@ if [[ $DO_BREW -eq 1 ]]; then
         uv tool install "$pkg"
       fi
     done
+  fi
+
+  # --- 3c. cargo tools ---
+  # Rust CLIs with no Homebrew formula, installed via cargo (provisioned above).
+  # bws: Bitwarden Secrets Manager CLI. `--locked` pins to the crate's Cargo.lock.
+  if command -v cargo >/dev/null 2>&1; then
+    if command -v bws >/dev/null 2>&1; then
+      log "cargo tool present: bws"
+    else
+      log "Installing cargo tool: bws"
+      cargo install bws --locked
+    fi
   fi
 else
   warn "Skipping Homebrew/Brewfile (--no-brew)"

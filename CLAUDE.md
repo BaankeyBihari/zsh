@@ -55,7 +55,7 @@ repo does not take effect until `install.sh` re-runs — `doctor.sh` reports any
 ```sh
 bin/install.sh              # apply repo state — snapshot → brew → znap → copy config → doctor. Idempotent.
 bin/install.sh --no-brew    # config copy only (skip Homebrew + Brewfile)
-bin/update.sh               # upgrade installed packages — snapshot → brew update/upgrade → bundle → uv tool upgrade → doctor.
+bin/update.sh               # upgrade installed packages — snapshot → brew update/upgrade → bundle → uv tool upgrade → cargo tool upgrade → doctor.
 bin/update.sh --greedy      # also upgrade self-updating casks; --no-cleanup keeps old versions
 bin/snapshot.sh             # manual snapshot before risky edits; prints the timestamp
 bin/rollback.sh             # list snapshots
@@ -81,7 +81,7 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
   installer, run `bin/snapshot.sh` first so rollback stays possible.
 - **`install.sh` provisions, `update.sh` upgrades — keep them separate.** `install.sh` only
   installs what's missing (so it stays fast and deterministic); use `bin/update.sh` to pull
-  newer versions of brew packages + uv tools. Caveat: snapshots capture **config only**, so
+  newer versions of brew packages + uv/cargo tools. Caveat: snapshots capture **config only**, so
   `rollback.sh` does NOT undo a package upgrade — recover a bad brew upgrade with brew itself
   (`brew install foo@<version>`), not rollback.
 - **Add behaviour as a new `NN-*.zsh` fragment** — do not extend `config/.zshrc`'s loader.
