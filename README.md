@@ -69,7 +69,7 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
 
 ```sh
 bin/install.sh           # apply changes (idempotent; installs missing, never upgrades)
-bin/update.sh            # upgrade brew packages + uv tools (see note below)
+bin/update.sh            # upgrade brew packages + uv/cargo tools (see note below)
 bin/doctor.sh            # health check
 bin/snapshot.sh          # back up before risky edits
 bin/rollback.sh <ts>     # restore a snapshot (bin/rollback.sh lists them; `latest` works too)

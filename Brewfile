@@ -9,6 +9,8 @@ brew "starship"
 # Version managers used by config/60-tools.zsh
 brew "fnm"
 brew "pyenv"
+brew "rust"
+brew "cargo-update" # `cargo install-update --all` — upgrades cargo-installed binaries; wired in bin/update.sh
 
 # AWS — granted provides `assume`, which config/.zshenv aliases unconditionally.
 brew "granted"
