@@ -55,7 +55,6 @@ brew "ollama"
 tap "hashicorp/tap"
 brew "hashicorp/tap/terraform"
 brew "cloud-nuke"
-brew "tailscale"
 
 # Terminal
 cask "ghostty"    # config/85-ghosttytheme.zsh drives it — must be provisioned
