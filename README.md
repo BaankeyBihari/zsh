@@ -60,7 +60,10 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
   unset), `claude` (wrapper: checks the proxy's `/readyz`, then routes the
   `claude` CLI through it via `ANTHROPIC_BASE_URL`; aborts with `headroom install
   status` if the proxy is down — `HEADROOM_OFF=1 claude` bypasses,
-  `--version`/`--help` skip the check). Plus
+  `--version`/`--help` skip the check), `bentopdf start|stop|update|status`
+  (manages the `bentopdf-service` Docker container, port 3000; `start` creates
+  it on first run with `--restart unless-stopped`, `update` pulls the latest
+  image and recreates it). Plus
   `ghosttytheme` (`config/85-ghosttytheme.zsh`) — Ghostty color-scheme switcher
   with fzf picker.
 - **Navigation**: zoxide (`z`/`zi`, `j` alias).

@@ -123,6 +123,46 @@ claude() {
   ANTHROPIC_BASE_URL="http://127.0.0.1:$port" command claude "$@"
 }
 
+# bentopdf — manage the BentoPDF Docker service (local PDF toolkit at localhost:3000).
+# Container run with --restart unless-stopped, so once started it survives
+# reboots/Docker restarts on its own; these subcommands are for manual control.
+#
+#   bentopdf start   # create (first run) or (re)start the container
+#   bentopdf stop    # stop the container, restart policy left in place
+#   bentopdf update  # pull latest image, recreate container
+#   bentopdf status  # docker ps filtered to this container
+bentopdf() {
+  if ! command -v docker >/dev/null 2>&1; then
+    print -u2 "bentopdf: docker not installed"
+    return 127
+  fi
+  local name="bentopdf-service" image="bentopdf/bentopdf:latest"
+  case "$1" in
+    start)
+      if docker ps -a --format '{{.Names}}' | grep -qx "$name"; then
+        docker start "$name"
+      else
+        docker run -d --name "$name" --restart unless-stopped -p 3000:80 "$image"
+      fi
+      ;;
+    stop)
+      docker stop "$name"
+      ;;
+    update)
+      docker pull "$image"
+      docker rm -f "$name" 2>/dev/null
+      docker run -d --name "$name" --restart unless-stopped -p 3000:80 "$image"
+      ;;
+    status)
+      docker ps -a --filter "name=$name"
+      ;;
+    *)
+      print -u2 "usage: bentopdf start|stop|update|status"
+      return 2
+      ;;
+  esac
+}
+
 logit() {
   local keep_days=30
   local dir="${XDG_CACHE_HOME:-$HOME/.cache}/captures"

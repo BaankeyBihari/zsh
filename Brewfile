@@ -19,6 +19,7 @@ brew "awscli"
 # Git/GitHub
 brew "gh"
 brew "pre-commit"   # manage git pre-commit hooks (.pre-commit-config.yaml)
+brew "mani"         # run commands / sync config across multiple repos
 
 # Productivity
 brew "bat"         # cat with syntax highlighting; guarded `cat` alias in 70-aliases.zsh
