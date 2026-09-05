@@ -43,14 +43,12 @@ brew "docker"
 brew "docker-compose"
 brew "docker-buildx"
 brew "docker-credential-helper"
+brew "ducker"      # TUI for managing docker containers/images (k9s-equivalent for docker)
 
 # Kubernetes
 brew "kubernetes-cli"
 brew "k9s"
 brew "stern"
-
-# Local LLMs
-brew "ollama"
 
 # Infra
 tap "hashicorp/tap"
