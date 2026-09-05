@@ -30,7 +30,10 @@ The fragments (`config/00-env.zsh` … `config/90-prompt.zsh`) own all real conf
 env → path → options → znap → plugins → completions → tools → aliases → functions → prompt.
 `install.sh` copies them into `~/.config/zsh/zsh.d/`. `99-local.zsh` (gitignored)
 sits at the `~/.config/zsh/` root — outside `zsh.d/`, so an install never purges it — and is the
-last-loaded, machine-specific override layer.
+last-loaded, machine-specific override layer. It sources `local-secrets.zsh` (also installed to
+the root, but tracked in the repo as `config/local-secrets.zsh`), which holds env vars whose
+*values* are derived at shell start (keychain, `docker context inspect`) rather than hardcoded —
+safe to commit since no literal secret ever lands in the file.
 
 ## How everything maps to the repo
 
@@ -42,7 +45,8 @@ last-loaded, machine-specific override layer.
 | The prompt                       | `starship/starship.toml`               |
 | A provisioned tool/app           | `Brewfile`                             |
 | The `$HOME` stub or `ZDOTDIR`    | `home/zshenv`                          |
-| Machine-specific / secret value  | `~/.config/zsh/99-local.zsh` (never committed) |
+| A derived value (keychain, `docker context`) | `config/local-secrets.zsh` (tracked — no literal secrets) |
+| A literal secret / hardcoded machine-specific value | `~/.config/zsh/99-local.zsh` (never committed) |
 
 Config is **copied, not symlinked**: `install.sh` copies the driver/stub files into place and
 rebuilds `~/.config/zsh/zsh.d/` from scratch each run (deleting a fragment from `config/` drops
@@ -118,9 +122,11 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
 
 ## Do not commit
 
-`.zsh_history`, `.zsh_sessions/`, `99-local.zsh` / `*.local.zsh`, anything secret, and any
-machine-specific PATH. The `99-local.zsh` escape hatch (see `config/99-local.zsh.example`)
-exists precisely so these never enter the repo.
+`.zsh_history`, `.zsh_sessions/`, `99-local.zsh` / `*.local.zsh`, any literal secret, and any
+hardcoded machine-specific PATH. The `99-local.zsh` escape hatch (see `config/99-local.zsh.example`)
+exists precisely so these never enter the repo. `config/local-secrets.zsh` is the one exception:
+it's tracked, but only ever holds lookup commands (keychain, `docker context inspect`), never a
+literal value — if a var can't be expressed as a derived lookup, it belongs in `99-local.zsh` instead.
 
 ## Extras (not repo config)
 

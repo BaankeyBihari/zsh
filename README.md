@@ -22,8 +22,8 @@ repo only take effect after you re-run `install.sh`.
 
 ```
 home/      → ~/.zshenv, ~/.zprofile        (the only files placed in $HOME)
-config/    → ~/.config/zsh/                 (.zshrc + .zshenv drivers copied to the root;
-             NN-*.zsh fragments copied into ~/.config/zsh/zsh.d/)
+config/    → ~/.config/zsh/                 (.zshrc + .zshenv drivers and local-secrets.zsh
+             copied to the root; NN-*.zsh fragments copied into ~/.config/zsh/zsh.d/)
 starship/  → ~/.config/starship.toml
 Brewfile     provisioned tools/apps
 bin/         install · update · snapshot · rollback · uninstall · doctor
@@ -101,7 +101,12 @@ pre-commit autoupdate     # rewrite rev: to the latest tags; review, then commit
 ## Machine-specific / secrets
 
 Copy `config/99-local.zsh.example` to `~/.config/zsh/99-local.zsh`. It's gitignored and loads
-last, so it overrides anything. Never put secrets or per-machine paths in tracked files.
+last, so it overrides anything. Never put literal secrets or per-machine paths in tracked files.
+
+`config/local-secrets.zsh` **is** tracked — it holds only dynamic lookups (macOS keychain,
+`docker context inspect`) that resolve at shell start, never a literal secret value.
+`99-local.zsh` sources it. Add a new var there only if the value is derived, not hardcoded;
+anything that can't be derived goes in the untracked `99-local.zsh` instead.
 
 ## Extras (versioned here, not installed)
 

@@ -49,6 +49,7 @@ check_copy "$REPO/home/zprofile"          "$HOME/.zprofile"
 check_copy "$REPO/starship/starship.toml" "$CONFIG_HOME/starship.toml"
 check_copy "$REPO/config/.zshrc"          "$ZDOTDIR_TARGET/.zshrc"
 check_copy "$REPO/config/.zshenv"         "$ZDOTDIR_TARGET/.zshenv"
+check_copy "$REPO/config/local-secrets.zsh" "$ZDOTDIR_TARGET/local-secrets.zsh"
 
 # $HOME must hold no zsh config beyond the managed stubs. A leftover pre-migration
 # ~/.zshrc is ignored while ZDOTDIR is set, but would take effect if ~/.zshenv were lost.
