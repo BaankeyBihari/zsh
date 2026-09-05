@@ -142,7 +142,7 @@ bentopdf() {
       if docker ps -a --format '{{.Names}}' | grep -qx "$name"; then
         docker start "$name"
       else
-        docker run -d --name "$name" --restart unless-stopped -p 3000:80 "$image"
+        docker run -d --name "$name" --restart unless-stopped -p 3000:8080 "$image"
       fi
       ;;
     stop)
@@ -151,7 +151,7 @@ bentopdf() {
     update)
       docker pull "$image"
       docker rm -f "$name" 2>/dev/null
-      docker run -d --name "$name" --restart unless-stopped -p 3000:80 "$image"
+      docker run -d --name "$name" --restart unless-stopped -p 3000:8080 "$image"
       ;;
     status)
       docker ps -a --filter "name=$name"
