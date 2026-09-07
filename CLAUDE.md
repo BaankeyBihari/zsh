@@ -137,6 +137,6 @@ global rules still apply via the live file, as in any repo — this copy is just
 
 ## Platform assumptions
 
-macOS + Apple Silicon (`/opt/homebrew`). Python tooling is pyenv + uv (conda was sunset in
-2026-07). Porting to Intel/Linux means generalizing the `brew shellenv` paths in
+macOS + Apple Silicon (`/opt/homebrew`). Python tooling is uv (pyenv and fnm sunset in
+2026-09, conda in 2026-07). Porting to Intel/Linux means generalizing the `brew shellenv` paths in
 `home/zshenv`.

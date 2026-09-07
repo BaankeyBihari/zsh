@@ -6,9 +6,7 @@ brew "zsh"
 brew "git"
 brew "starship"
 
-# Version managers used by config/60-tools.zsh
-brew "fnm"
-brew "pyenv"
+# Rust toolchain
 brew "rust"
 brew "cargo-update" # `cargo install-update --all` — upgrades cargo-installed binaries; wired in bin/update.sh
 
