@@ -61,6 +61,7 @@ cask "ghostty"    # config/85-ghosttytheme.zsh drives it — must be provisioned
 cask "font-meslo-lg-nerd-font"
 
 # Apps
+cask "jordanbaird-ice"
 cask "maccy"
 cask "sublime-text"
 
