@@ -64,6 +64,7 @@ cask "font-meslo-lg-nerd-font"
 cask "jordanbaird-ice"
 cask "maccy"
 cask "sublime-text"
+cask "swift-quit"
 
 # Google Antigravity — agent orchestration platform, IDE, and terminal CLI.
 cask "antigravity"        # Antigravity.app — agent orchestration platform
