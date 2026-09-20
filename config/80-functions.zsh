@@ -123,6 +123,25 @@ claude() {
   ANTHROPIC_BASE_URL="http://127.0.0.1:$port" command claude "$@"
 }
 
+# codex — same guarded Headroom routing as claude, using the proxy's OpenAI
+# endpoint. HEADROOM_OFF=1 bypasses it; --version/--help stay direct.
+codex() {
+  [[ -n "$HEADROOM_OFF" ]] && { command codex "$@"; return; }
+  case "$1" in
+    -v|--version|-h|--help) command codex "$@"; return ;;
+  esac
+  local port="${HEADROOM_PORT:-8787}"
+  if ! curl -fsS --connect-timeout 1 --max-time 2 "http://127.0.0.1:$port/readyz" >/dev/null 2>&1; then
+    print -ru2 -- "headroom proxy down (http://127.0.0.1:$port/readyz) — codex launch aborted"
+    print -ru2 -- "--- headroom install status ---"
+    headroom install status >&2
+    print -ru2 -- "fix: 'headroom install start' if stopped, or"
+    print -ru2 -- "     'headroom install apply --preset persistent-service --providers auto' if not deployed"
+    return 1
+  fi
+  OPENAI_BASE_URL="http://127.0.0.1:$port/v1" command codex "$@"
+}
+
 # bentopdf — manage the BentoPDF Docker service (local PDF toolkit at localhost:3000).
 # Container run with --restart unless-stopped, so once started it survives
 # reboots/Docker restarts on its own; these subcommands are for manual control.
