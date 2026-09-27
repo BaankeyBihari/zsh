@@ -3,4 +3,4 @@
 # Deliberately minimal: Homebrew PATH is set in ~/.zshenv (runs for every shell), and
 # interactive config lives under $ZDOTDIR. Login-only setup, if any, goes here.
 #
-# Legacy gCloner() now lives in $ZDOTDIR/80-functions.zsh under version control.
+# Legacy gCloner() was rolled into manigen() in $ZDOTDIR/80-functions.zsh under version control.

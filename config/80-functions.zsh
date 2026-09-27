@@ -1,11 +1,41 @@
-# gCloner — clone a repo into <repoName>/<branch>. Branch defaults to main.
-# Ported from the legacy ~/.zprofile so it lives under version control.
-gCloner() {
-  local repoUrl="$1"
-  local branchName="${2:-main}"
-  local repoName
-  repoName="$(basename -s .git "$repoUrl")"
-  git clone --branch "$branchName" "$repoUrl" "$repoName/$branchName"
+# manigen — clone repos flat into the cwd, then (re)generate mani.yaml from every
+# git dir found there (except Work/, which holds worktrees, not projects). Rolls
+# up the old gCloner: pass repo URLs to clone before the scan, or none to just
+# rescan after adding/removing a repo by hand. Existing repoName dirs are left
+# alone (idempotent — safe to re-run after a manual `git clone`/`git init`).
+#
+#   manigen                                  # rescan cwd only
+#   manigen git@github.com:org/repo.git ...  # clone (main, falling back to
+#                                             # whatever default branch), then scan
+manigen() {
+  local repoUrl repoName
+  for repoUrl in "$@"; do
+    repoName="$(basename -s .git "$repoUrl")"
+    if [[ -d "$repoName" ]]; then
+      print "manigen: skipping $repoName (already exists)"
+    else
+      print "manigen: cloning $repoName"
+      git clone --branch main "$repoUrl" "$repoName" 2>/dev/null || git clone "$repoUrl" "$repoName"
+    fi
+  done
+
+  local dir count=0
+  {
+    print "import:"
+    print "  - ~/.config/mani/tasks.yaml"
+    print ""
+    print "projects:"
+    for dir in */; do
+      dir="${dir%/}"
+      [[ "$dir" == "Work" ]] && continue
+      [[ -d "$dir/.git" ]] || continue
+      print "  $dir:"
+      print "    path: ./$dir"
+      (( count++ ))
+    done
+  } > mani.yaml
+
+  print "manigen: wrote mani.yaml ($count projects)"
 }
 
 # rename-tab — set a sticky title on the current terminal tab/window.
