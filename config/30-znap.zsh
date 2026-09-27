@@ -14,6 +14,6 @@ fi
 if [[ -r "$_ZNAP_HOME/znap.zsh" ]]; then
   source "$_ZNAP_HOME/znap.zsh"
 else
-  print -u2 "znap unavailable; starting without plugins. Run ~/zsh/bin/install.sh when online."
+  print -u2 "znap unavailable; starting without plugins. Run ~/Projects/zsh/zsh/bin/install.sh when online."
 fi
 unset _ZNAP_HOME
