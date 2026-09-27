@@ -44,6 +44,7 @@ safe to commit since no literal secret ever lands in the file.
 | An alias / function              | `config/70-aliases.zsh` / `80-functions.zsh` |
 | The prompt                       | `starship/starship.toml`               |
 | A provisioned tool/app           | `Brewfile`                             |
+| Global `mani` tasks (sync/create-work) | `mani/tasks.yaml`                |
 | The `$HOME` stub or `ZDOTDIR`    | `home/zshenv`                          |
 | A derived value (keychain, `docker context`) | `config/local-secrets.zsh` (tracked — no literal secrets) |
 | A literal secret / hardcoded machine-specific value | `~/.config/zsh/99-local.zsh` (never committed) |

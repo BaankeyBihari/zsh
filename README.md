@@ -25,6 +25,8 @@ home/      → ~/.zshenv, ~/.zprofile        (the only files placed in $HOME)
 config/    → ~/.config/zsh/                 (.zshrc + .zshenv drivers and local-secrets.zsh
              copied to the root; NN-*.zsh fragments copied into ~/.config/zsh/zsh.d/)
 starship/  → ~/.config/starship.toml
+mani/      → ~/.config/mani/tasks.yaml     (global sync/create-work tasks, imported by
+             each project's own mani.yaml)
 Brewfile     provisioned tools/apps
 bin/         install · update · snapshot · rollback · uninstall · doctor
 snapshots/   timestamped backups (gitignored)
@@ -50,7 +52,9 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
   (incompatible CLIs); use `fd` directly.
 - **git**: delta as pager (syntax-highlighted diffs; configured in `~/.gitconfig`, outside
   this repo's snapshots).
-- **Functions** (`config/80-functions.zsh`): `gCloner`,
+- **Functions** (`config/80-functions.zsh`): `manigen` (clone repo URLs flat into
+  the cwd, then generate/refresh `mani.yaml` from every git dir found there —
+  run with no args to just rescan after a manual clone/init; skips `Work/`),
   `rename-tab`, `benchmark` (hyperfine with default warmup), `logit` (tee a command's
   output to `~/.cache/captures/*.md`, each line timestamped and labelled
   `[STDOUT]`/`[STDERR]` — self-prunes after 30 days; `logit -p` for the plain unlabelled

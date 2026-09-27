@@ -1,0 +1,30 @@
+tasks:
+  sync:
+    desc: "Update reference repos (safe for local-only repos)"
+    spec:
+      parallel: true
+    cmd: |
+      # 1. Switch to default branch
+      DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+      DEFAULT_BRANCH=${DEFAULT_BRANCH:-main}
+      git checkout $DEFAULT_BRANCH --quiet
+
+      # 2. Only pull if an 'origin' remote is configured
+      if git remote | grep -q 'origin'; then
+        git pull --ff-only
+      else
+        echo "Local-only repo ($MANI_PROJECT_NAME): skipped network pull."
+      fi
+
+  create-work:
+    desc: "Spin up Work/Work-{slug} environment across ALL repos (remote & local)"
+    spec:
+      parallel: true
+    cmd: |
+      SLUG="${slug:?Specify slug, e.g. mani run create-work slug=jira-101}"
+      REPO_NAME="$(basename $MANI_PROJECT_PATH)"
+      WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
+
+      git worktree add -b "$SLUG" "$WORK_DIR" main 2>/dev/null \
+      || git worktree add -b "$SLUG" "$WORK_DIR" master 2>/dev/null \
+      || git worktree add "$WORK_DIR" "$SLUG"
