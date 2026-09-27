@@ -12,3 +12,6 @@ export HF_TOKEN="$(security find-generic-password -a "$USER" -s hf-access-token 
 export ENABLE_TOOL_SEARCH="true"
 # Bitwarden Secrets Manager (bws CLI) access token for pulling project secrets.
 export BWS_ACCESS_TOKEN="$(security find-generic-password -a "$USER" -s bws-access-token -w 2>/dev/null)"
+
+# LocalStack Pro auth token, read by the localstack CLI.
+export LOCALSTACK_AUTH_TOKEN="$(security find-generic-password -a "$USER" -s localstack-auth-token -w 2>/dev/null)"

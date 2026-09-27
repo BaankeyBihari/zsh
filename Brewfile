@@ -53,6 +53,10 @@ tap "hashicorp/tap"
 brew "hashicorp/tap/terraform"
 brew "cloud-nuke"
 
+# LocalStack — lstk is the CLI, LOCALSTACK_AUTH_TOKEN wired in config/local-secrets.zsh
+tap "localstack/tap"
+cask "localstack/tap/lstk"
+
 # Terminal
 cask "ghostty"    # config/85-ghosttytheme.zsh drives it — must be provisioned
 
