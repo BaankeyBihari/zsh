@@ -182,6 +182,56 @@ bentopdf() {
   esac
 }
 
+# tokens — view or update the keychain-backed secrets exported by
+# config/local-secrets.zsh. `list` shows each var masked to its last 4 chars
+# (or "not set"); `show NAME` prints one token's full value; `set NAME`
+# prompts (hidden input) and writes the keychain entry, then exports it
+# into the current shell.
+#
+#   tokens              # same as `tokens list`
+#   tokens show HF_TOKEN
+#   tokens set HF_TOKEN
+tokens() {
+  local -A svc=(
+    HF_TOKEN               hf-access-token
+    BWS_ACCESS_TOKEN       bws-access-token
+    LOCALSTACK_AUTH_TOKEN  localstack-auth-token
+  )
+  case "$1" in
+    list|"")
+      local name val
+      for name in "${(@ok)svc}"; do
+        val="${(P)name}"
+        if [[ -n "$val" ]]; then
+          print -r -- "$name: ...${val: -4}"
+        else
+          print -r -- "$name: not set"
+        fi
+      done
+      ;;
+    show)
+      local name="$2"
+      [[ -n "${svc[$name]}" ]] || { print -u2 "tokens: unknown token '$name' (${(ok)svc})"; return 2 }
+      print -r -- "${(P)name}"
+      ;;
+    set)
+      local name="$2"
+      [[ -n "${svc[$name]}" ]] || { print -u2 "tokens: unknown token '$name' (${(ok)svc})"; return 2 }
+      local value
+      read -rs "value?tokens: enter value for $name: "
+      print
+      [[ -n "$value" ]] || { print -u2 "tokens: empty input, $name left unchanged"; return 1 }
+      security add-generic-password -a "$USER" -s "${svc[$name]}" -w "$value" -U
+      export "$name=$value"
+      print "tokens: updated $name"
+      ;;
+    *)
+      print -u2 "usage: tokens [list|show <name>|set <name>]"
+      return 2
+      ;;
+  esac
+}
+
 logit() {
   local keep_days=30
   local dir="${XDG_CACHE_HOME:-$HOME/.cache}/captures"

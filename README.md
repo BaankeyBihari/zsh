@@ -63,7 +63,10 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
   `--version`/`--help` skip the check), `bentopdf start|stop|update|status`
   (manages the `bentopdf-service` Docker container, port 3000; `start` creates
   it on first run with `--restart unless-stopped`, `update` pulls the latest
-  image and recreates it). Plus
+  image and recreates it), `tokens list|show NAME|set NAME` (view
+  keychain-backed secrets from `config/local-secrets.zsh` masked to their
+  last 4 chars, print one in full, or set one via hidden prompt +
+  `security add-generic-password`). Plus
   `ghosttytheme` (`config/85-ghosttytheme.zsh`) — Ghostty color-scheme switcher
   with fzf picker.
 - **Navigation**: zoxide (`z`/`zi`, `j` alias).
