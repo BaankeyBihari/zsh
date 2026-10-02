@@ -74,9 +74,8 @@ bin/doctor.sh               # health check: managed-copy drift/stale/missing, to
 
 `mise.toml` pins dev tools (pre-commit, shellcheck, shfmt) and wraps the commands above as
 `mise run <task>` (`mise tasks` lists them): `install`, `update`, `doctor`, `snapshot`,
-`rollback <ts>`, plus `syntax`, `lint`, `check` (syntax + shellcheck + pre-commit), `startup`.
-`bin/*.sh` stay the source of truth. `fmt-check` (shfmt) is outside `check` until the scripts
-are reformatted. `config/60-tools.zsh` runs `mise activate zsh`, so bare pinned tools resolve per
+`rollback <ts>`, plus `syntax`, `lint`, `fmt` (shfmt -w), `check` (syntax + shellcheck + `fmt-check` + pre-commit), `startup`.
+`bin/*.sh` stay the source of truth. `config/60-tools.zsh` runs `mise activate zsh`, so bare pinned tools resolve per
 directory in every repo that has a mise config (adds ~1 subprocess to startup).
 
 Verification helpers:

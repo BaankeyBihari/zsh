@@ -47,13 +47,17 @@ exit $rc
 description = "shellcheck on bin scripts (warnings+; SC2088 off: doctor.sh prints a literal ~ on purpose)"
 run = "shellcheck -S warning -e SC2088 bin/*.sh"
 
+[tasks.fmt]
+description = "Reformat bin scripts in place with shfmt"
+run = "shfmt -w -i 2 -ci bin/*.sh"
+
 [tasks.fmt-check]
-description = "shfmt diff on bin scripts (not in `check`: existing scripts don't match yet; fix with `shfmt -w -i 2 -ci bin/*.sh`)"
+description = "shfmt diff on bin scripts (fix with `mise run fmt`)"
 run = "shfmt -d -i 2 -ci bin/*.sh"
 
 [tasks.check]
-description = "syntax + lint + pre-commit on all files"
-depends = ["syntax", "lint"]
+description = "syntax + lint + fmt-check + pre-commit on all files"
+depends = ["syntax", "lint", "fmt-check"]
 run = "pre-commit run --all-files"
 
 [tasks.startup]

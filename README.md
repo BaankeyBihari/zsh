@@ -98,9 +98,9 @@ bin/uninstall.sh         # restore the most recent snapshot
 
 `mise.toml` pins dev tools (pre-commit, shellcheck, shfmt) and wraps the above as tasks:
 run `mise trust && mise install` once, then `mise tasks` to list. `mise run install|update|doctor|snapshot|rollback <ts>`
-call the `bin/` scripts; `mise run syntax|lint|check|startup` are the verification helpers
-(`check` = syntax + shellcheck + `pre-commit run --all-files`; `fmt-check` is shfmt, not in `check`
-until the scripts are reformatted). `config/60-tools.zsh` runs `mise activate zsh`, so pinned
+call the `bin/` scripts; `mise run syntax|lint|fmt-check|check|startup` are the verification helpers
+(`check` = syntax + shellcheck + shfmt diff + `pre-commit run --all-files`; `mise run fmt` rewrites
+`bin/*.sh` with shfmt). `config/60-tools.zsh` runs `mise activate zsh`, so pinned
 tools and `[env]` load per directory in any repo with a mise config.
 
 ## Pre-commit hooks
