@@ -3,9 +3,19 @@
 # it when it rebuilds the fragment directory. It is gitignored and sourced LAST, after every
 # zsh.d/ fragment, so it can override any of them.
 #
+# Keychain-backed tokens do not go here: add `ENV_NAME: keychain-service` under `unmanaged:`
+# in ~/.config/tokens/map.yaml instead (see config/65-tokens.zsh).
+#
 # Examples:
 #
-# export ANTHROPIC_API_KEY="sk-…"
 # alias work='cd ~/work/this-machine-only'
 # path=(/Users/me/some/work/path $path) && export PATH
 # eval "$(direnv hook zsh)"
+
+# Tracked exports (config/local-exports.zsh), installed beside this file.
+[[ -r "${0:h}/local-exports.zsh" ]] && source "${0:h}/local-exports.zsh"
+
+# Untracked, hand-made secrets file (literal values live here, never in the repo). Prefer the
+# token service: add `ENV_NAME: keychain-service` under `unmanaged:` in ~/.config/tokens/map.yaml
+# so the value stays in the keychain, and use this file only for what can't live there.
+[[ -r "${0:h}/local-secrets.zsh" ]] && source "${0:h}/local-secrets.zsh"

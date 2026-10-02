@@ -30,9 +30,9 @@ The fragments (`config/00-env.zsh` … `config/90-prompt.zsh`) own all real conf
 env → path → options → znap → plugins → completions → tools → aliases → functions → prompt.
 `install.sh` copies them into `~/.config/zsh/zsh.d/`. `99-local.zsh` (gitignored)
 sits at the `~/.config/zsh/` root — outside `zsh.d/`, so an install never purges it — and is the
-last-loaded, machine-specific override layer. It sources `local-secrets.zsh` (also installed to
-the root, but tracked in the repo as `config/local-secrets.zsh`), which holds env vars whose
-*values* are derived at shell start (keychain, `docker context inspect`) rather than hardcoded —
+last-loaded, machine-specific override layer. It sources `local-exports.zsh` (also installed to
+the root, but tracked in the repo as `config/local-exports.zsh`), which holds env vars whose
+*values* are derived at shell start (`docker context inspect`) or are plain flags, rather than hardcoded —
 safe to commit since no literal secret ever lands in the file. Keychain-backed tokens are
 the exception to that file: `config/65-tokens.zsh` exports them from `~/.config/tokens/map.yaml`
 (`ENV_NAME: keychain service`, names only). The map has a `managed:` section that `install.sh`
@@ -53,7 +53,7 @@ is the user's and is preserved byte-for-byte; `unmanaged` wins on a name clash.
 | A dev tool / `mise run` task     | `mise.toml`                            |
 | Global `mani` tasks (sync/create-work) | `mani/tasks.yaml`                |
 | The `$HOME` stub or `ZDOTDIR`    | `home/zshenv`                          |
-| A derived value (keychain, `docker context`) | `config/local-secrets.zsh` (tracked — no literal secrets) |
+| A derived value (keychain, `docker context`) | `config/local-exports.zsh` (tracked — no literal secrets) |
 | A keychain-backed env var (provisioned) | `config/tokens-map.yaml` (`managed:` section; installed to `~/.config/tokens/map.yaml`) |
 | A keychain-backed env var (this machine only) | `~/.config/tokens/map.yaml` `unmanaged:` section (never overwritten) |
 | A literal secret / hardcoded machine-specific value | `~/.config/zsh/99-local.zsh` (never committed) |
@@ -151,7 +151,7 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
 
 `.zsh_history`, `.zsh_sessions/`, `99-local.zsh` / `*.local.zsh`, any literal secret, and any
 hardcoded machine-specific PATH. The `99-local.zsh` escape hatch (see `config/99-local.zsh.example`)
-exists precisely so these never enter the repo. `config/local-secrets.zsh` is the one exception:
+exists precisely so these never enter the repo. `config/local-exports.zsh` is the one exception:
 it's tracked, but only ever holds lookup commands (keychain, `docker context inspect`), never a
 literal value — if a var can't be expressed as a derived lookup, it belongs in `99-local.zsh` instead.
 `config/tokens-map.yaml` is likewise tracked but holds only env-var and keychain-service *names*.

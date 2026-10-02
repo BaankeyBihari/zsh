@@ -59,7 +59,7 @@ check_copy "$REPO/tmux/tmux.conf" "$CONFIG_HOME/tmux/tmux.conf"
 check_copy "$REPO/ghostty/config.ghostty" "$GHOSTTY_DIR/config.ghostty"
 check_copy "$REPO/config/.zshrc" "$ZDOTDIR_TARGET/.zshrc"
 check_copy "$REPO/config/.zshenv" "$ZDOTDIR_TARGET/.zshenv"
-check_copy "$REPO/config/local-secrets.zsh" "$ZDOTDIR_TARGET/local-secrets.zsh"
+check_copy "$REPO/config/local-exports.zsh" "$ZDOTDIR_TARGET/local-exports.zsh"
 check_copy "$REPO/mani/tasks.yaml" "$CONFIG_HOME/mani/tasks.yaml"
 
 # Token map: only the managed section (above `unmanaged:`) must match the repo; the

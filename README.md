@@ -22,7 +22,7 @@ repo only take effect after you re-run `install.sh`.
 
 ```
 home/      → ~/.zshenv, ~/.zprofile        (the only files placed in $HOME)
-config/    → ~/.config/zsh/                 (.zshrc + .zshenv drivers and local-secrets.zsh
+config/    → ~/.config/zsh/                 (.zshrc + .zshenv drivers and local-exports.zsh
              copied to the root; NN-*.zsh fragments copied into ~/.config/zsh/zsh.d/)
              config/tokens-map.yaml → managed section of ~/.config/tokens/map.yaml
 starship/  → ~/.config/starship.toml
@@ -134,7 +134,7 @@ rewritten from `config/tokens-map.yaml` on every install; put machine-specific e
 `unmanaged:`, which install never touches (and which wins on a name clash). Only that flat YAML
 subset is parsed.
 
-`config/local-secrets.zsh` **is** tracked — it holds only dynamic lookups (macOS keychain,
+`config/local-exports.zsh` **is** tracked — it holds only dynamic lookups (macOS keychain,
 `docker context inspect`) that resolve at shell start, never a literal secret value.
 `99-local.zsh` sources it. Add a new var there only if the value is derived, not hardcoded;
 anything that can't be derived goes in the untracked `99-local.zsh` instead.
