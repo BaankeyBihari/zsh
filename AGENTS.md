@@ -43,7 +43,7 @@ safe to commit since no literal secret ever lands in the file.
 | A plugin                         | `config/40-plugins.zsh` (`znap source …`) |
 | An alias / function              | `config/70-aliases.zsh` / `80-functions.zsh` |
 | The prompt                       | `starship/starship.toml`               |
-| The tmux status bar              | `tmux/tmux.conf`                       |
+| The tmux status bar / mouse      | `tmux/tmux.conf`                       |
 | A provisioned tool/app           | `Brewfile`                             |
 | Global `mani` tasks (sync/create-work) | `mani/tasks.yaml`                |
 | The `$HOME` stub or `ZDOTDIR`    | `home/zshenv`                          |
