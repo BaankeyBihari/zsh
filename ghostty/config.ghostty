@@ -32,6 +32,10 @@ quick-terminal-autohide = true
 cursor-style = block
 cursor-style-blink = true
 
+# --- Keyboard ---
+# Option sends Alt/Esc-prefix, not ç/å/etc. — needed for fzf Alt-C (fuzzy cd).
+macos-option-as-alt = true
+
 # --- Copy ---
 copy-on-select = clipboard
 
