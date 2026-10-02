@@ -135,12 +135,15 @@ rewritten from `config/tokens-map.yaml` on every install; put machine-specific e
 `unmanaged:`, which install never touches (and which wins on a name clash). Entries are 2-space
 indented: `NAME: service`, or nested `service:` plus an optional `validator:` (any shell command or
 script, exit 0 = good, output hidden; the token is in its environment under its own name). Validators
-run only on `tokens validate [NAME]`, never at shell start. Only that flat YAML subset is parsed.
+run only on `tokens validate [NAME]`, never at shell start. The repo ships validators for
+`HF_TOKEN` (HuggingFace `whoami-v2`) and `BWS_ACCESS_TOKEN` (`bws project list`); LocalStack has none
+yet (no known non-interactive token check), so it only warns. Only that flat YAML subset is parsed.
 
-`config/local-exports.zsh` **is** tracked — it holds only dynamic lookups (macOS keychain,
-`docker context inspect`) that resolve at shell start, never a literal secret value.
-`99-local.zsh` sources it. Add a new var there only if the value is derived, not hardcoded;
-anything that can't be derived goes in the untracked `99-local.zsh` instead.
+`config/local-exports.zsh` **is** tracked — it holds only plain flags and dynamic lookups
+(`docker context inspect`) that resolve at shell start, never a literal secret value.
+`99-local.zsh` sources it (and an optional untracked `local-secrets.zsh`, if present). Add a new var
+there only if the value is derived, not hardcoded; keychain-backed tokens go in the token map above;
+anything else that can't be derived goes in the untracked `99-local.zsh` or `local-secrets.zsh`.
 
 ## Extras (versioned here, not installed)
 

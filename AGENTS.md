@@ -54,7 +54,7 @@ a `validator:` (shell command/script) that `tokens validate` runs; it never runs
 | A dev tool / `mise run` task     | `mise.toml`                            |
 | Global `mani` tasks (sync/create-work) | `mani/tasks.yaml`                |
 | The `$HOME` stub or `ZDOTDIR`    | `home/zshenv`                          |
-| A derived value (keychain, `docker context`) | `config/local-exports.zsh` (tracked — no literal secrets) |
+| A derived value (`docker context`) or plain flag | `config/local-exports.zsh` (tracked — no literal secrets) |
 | A keychain-backed env var (provisioned) | `config/tokens-map.yaml` (`managed:` section; installed to `~/.config/tokens/map.yaml`) |
 | A keychain-backed env var (this machine only) | `~/.config/tokens/map.yaml` `unmanaged:` section (never overwritten) |
 | A literal secret / hardcoded machine-specific value | `~/.config/zsh/99-local.zsh` (never committed) |
@@ -133,6 +133,10 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
   describes — commands/flags, fragments, provisioned tools, functions/aliases, invariants,
   the load model — update both files in the same commit. Nothing automated checks docs
   (doctor/pre-commit only verify code), so drift is caught only here.
+- **Keep `cheat` in sync.** Whenever a function or alias is added, renamed, removed, or its
+  usage/subcommands/flags change, update the `cheat` text in `config/80-functions.zsh` (the
+  `keys`/`aliases`/`funcs` sections) in the same commit. It is static text, so nothing flags a
+  stale entry. Check it by running `cheat` after `bin/install.sh`.
 - The canonical "I broke it" loop: `bin/rollback.sh <prev-ts>` → fix repo → `bin/install.sh`.
 
 ## Invariants
@@ -153,7 +157,7 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
 `.zsh_history`, `.zsh_sessions/`, `99-local.zsh` / `*.local.zsh`, any literal secret, and any
 hardcoded machine-specific PATH. The `99-local.zsh` escape hatch (see `config/99-local.zsh.example`)
 exists precisely so these never enter the repo. `config/local-exports.zsh` is the one exception:
-it's tracked, but only ever holds lookup commands (keychain, `docker context inspect`), never a
+it's tracked, but only ever holds flags and lookup commands (`docker context inspect`), never a
 literal value — if a var can't be expressed as a derived lookup, it belongs in `99-local.zsh` instead.
 `config/tokens-map.yaml` is likewise tracked but holds only env-var and keychain-service *names*.
 

@@ -485,7 +485,7 @@ FUNCTIONS
   logit [-p] [-n slug] <cmd…>  capture output to ~/.cache/captures; logit -l = newest
   toggle-headroom     route Anthropic/OpenAI via the Headroom proxy; again = unset
   claude codex agy    tmux-backed, resumable (HEADROOM_OFF=1 = direct)
-  tokens [list|show|set <name>]  keychain-backed API tokens
+  tokens [list|show|set <name>|validate [name]]  keychain-backed API tokens
   bentopdf start|stop|update|status  PDF tool container
   ghosttytheme        pick Ghostty theme
 EOS
