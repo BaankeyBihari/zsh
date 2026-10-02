@@ -169,6 +169,8 @@ copy_file "$REPO/config/.zshrc"        "$ZDOTDIR_TARGET/.zshrc"
 copy_file "$REPO/config/.zshenv"       "$ZDOTDIR_TARGET/.zshenv"
 copy_file "$REPO/starship/starship.toml" "$CONFIG_HOME/starship.toml"
 copy_file "$REPO/config/local-secrets.zsh" "$ZDOTDIR_TARGET/local-secrets.zsh"
+mkdir -p "$CONFIG_HOME/tmux"
+copy_file "$REPO/tmux/tmux.conf" "$CONFIG_HOME/tmux/tmux.conf"
 mkdir -p "$CONFIG_HOME/mani"
 copy_file "$REPO/mani/tasks.yaml" "$CONFIG_HOME/mani/tasks.yaml"
 

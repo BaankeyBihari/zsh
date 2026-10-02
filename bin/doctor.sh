@@ -47,6 +47,7 @@ fi
 check_copy "$REPO/home/zshenv"            "$HOME/.zshenv"
 check_copy "$REPO/home/zprofile"          "$HOME/.zprofile"
 check_copy "$REPO/starship/starship.toml" "$CONFIG_HOME/starship.toml"
+check_copy "$REPO/tmux/tmux.conf"          "$CONFIG_HOME/tmux/tmux.conf"
 check_copy "$REPO/config/.zshrc"          "$ZDOTDIR_TARGET/.zshrc"
 check_copy "$REPO/config/.zshenv"         "$ZDOTDIR_TARGET/.zshenv"
 check_copy "$REPO/config/local-secrets.zsh" "$ZDOTDIR_TARGET/local-secrets.zsh"

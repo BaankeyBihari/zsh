@@ -25,6 +25,7 @@ home/      → ~/.zshenv, ~/.zprofile        (the only files placed in $HOME)
 config/    → ~/.config/zsh/                 (.zshrc + .zshenv drivers and local-secrets.zsh
              copied to the root; NN-*.zsh fragments copied into ~/.config/zsh/zsh.d/)
 starship/  → ~/.config/starship.toml
+tmux/      → ~/.config/tmux/tmux.conf      (status bar; per-agent logo from session-name prefix)
 mani/      → ~/.config/mani/tasks.yaml     (global sync/create-work tasks, imported by
              each project's own mani.yaml)
 Brewfile     provisioned tools/apps

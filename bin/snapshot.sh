@@ -3,7 +3,8 @@
 # Called automatically by install.sh; also runnable standalone before risky edits.
 #
 # Captures: ~/.zshenv ~/.zshrc ~/.zprofile ~/.config/zsh/ ~/.config/starship.toml
-# Writes:   snapshots/<ts>/{home/,config-zsh/,starship.toml,manifest.json}
+#           ~/.config/tmux/tmux.conf
+# Writes:   snapshots/<ts>/{home/,config-zsh/,starship.toml,tmux.conf,manifest.json}
 #
 # Prints the snapshot timestamp on stdout (so callers can capture it).
 
@@ -41,6 +42,7 @@ capture_file "$HOME/.zshenv"   "$DEST/home/.zshenv"   "home/.zshenv"
 capture_file "$HOME/.zshrc"    "$DEST/home/.zshrc"    "home/.zshrc"
 capture_file "$HOME/.zprofile" "$DEST/home/.zprofile" "home/.zprofile"
 capture_file "$HOME/.config/starship.toml" "$DEST/starship.toml" "config/starship.toml"
+capture_file "$HOME/.config/tmux/tmux.conf" "$DEST/tmux.conf" "config/tmux.conf"
 
 # Capture the whole ~/.config/zsh tree (files + symlinks) if it exists.
 if [[ -d "$HOME/.config/zsh" ]]; then
