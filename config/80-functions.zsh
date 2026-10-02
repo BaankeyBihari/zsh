@@ -496,16 +496,17 @@ EOS
 WORKFLOW (mani acts across repos, gita shows status; tasks in ~/.config/mani/tasks.yaml)
   Run mani from the folder holding mani.yaml (see manigen); --all = every project.
   1 morning     mani run sync --all                     pull default branch everywhere
-                gita ll reference                       base repos: clean / up to date?
-  2 new ticket  mani run create-work slug=T-1 --all     Work/Work-T-1/<repo> worktrees,
-                                                        upstream set, gita group "T-1"
-  3 dashboard   gita ll T-1                             * modified  + staged  ahead/behind
+                                                        (gita group = <workspace folder>-reference)
+                gita ll <workspace>-reference          base repos: clean / up to date?
+  2 new ticket  mani run create-work slug=T-1 --all     Work/Work-<workspace>-T-1/<repo>,
+                                                        upstream set, gita group <workspace>-T-1
+  3 dashboard   gita ll <workspace>-T-1                 * modified  + staged  ahead/behind
   4 update      mani run rebase-work slug=T-1 --all     rebase on default (halts on conflict)
                 mani run push-work slug=T-1 --all       push every worktree
                 mani run pull-work slug=T-1 --all       pull --ff-only
-  5 teardown    mani run clean-work slug=T-1 --all      refuses dirty / unpushed repos
+  5 teardown    mani run clean-work slug=T-1 --all      refuses dirty / unpushed repos; drops gita entries
                 mani run clean-work-forced slug=T-1 --all   DESTROYS unpushed work
-  gita ll         all repos          gita ll reference   base repos only
+  gita ll         all repos          gita ll <workspace>-reference   base repos only
 EOS
   fi
 }

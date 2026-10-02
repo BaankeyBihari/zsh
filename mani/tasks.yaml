@@ -18,21 +18,35 @@ tasks:
         echo "Local-only repo ($REPO_NAME): skipped network pull."
       fi
 
-      # 3. Register base repo to Gita using file lock
+      # 3. Register base repo to Gita using file lock. The group is namespaced by the
+      # workspace folder (parent of the repo) so each workspace gets its own
+      # "<workspace>-reference" group instead of sharing one global "reference". Gita groups take
+      # repo names, and `gita add -g` skips repos it already knows, so add first, then look the
+      # name up from the path.
+      WORKSPACE="$(basename "$(dirname "$PWD")")"
+      ABS_DIR="$(pwd -P)"
       (
         flock -x 200
-        gita add . >/dev/null 2>&1
-        gita group add reference . >/dev/null 2>&1 || true
+        gita add "$ABS_DIR" >/dev/null 2>&1
+        for NAME in $(gita ls); do
+          if [ "$(gita ls "$NAME")" = "$ABS_DIR" ]; then
+            gita group add -n "${WORKSPACE}-reference" "$NAME" >/dev/null
+            break
+          fi
+        done
       ) 200>/tmp/gita-mani.lock
 
   create-work:
-    desc: "Spin up Work/Work-{slug} environment across ALL repos and set upstream"
+    desc: "Spin up Work/Work-{workspace}-{slug} environment across ALL repos and set upstream"
     spec:
       parallel: true
     cmd: |
       SLUG="${slug:?Specify slug, e.g. mani run create-work slug=jira-101}"
       REPO_NAME="$(basename "$PWD")"
-      WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
+      # Qualified by workspace: Gita names a worktree by its last two path parts, so this keeps
+      # same-named repos in different workspaces from colliding in Gita.
+      WORKSPACE="$(basename "$(dirname "$PWD")")"
+      WORK_DIR="./Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
 
       # Create new branch or fallback to restoring an existing one
       if git worktree add -b "$SLUG" "$WORK_DIR" main 2>/dev/null || git worktree add -b "$SLUG" "$WORK_DIR" master 2>/dev/null; then
@@ -45,11 +59,24 @@ tasks:
         git worktree add "$WORK_DIR" "$SLUG" 2>/dev/null
       fi
 
-      # Register with Gita safely using a file lock
+      # Register with Gita safely using a file lock. The group is "<workspace>-<slug>" (workspace =
+      # parent folder of the repo) so the same ticket slug in two workspaces stays separate.
+      # Gita groups take repo names (a worktree is named by its path, e.g. Work-T-1/repo), so add
+      # first, then look the name up from the path.
+      if [ ! -d "$WORK_DIR" ]; then
+        echo "❌ [$REPO_NAME]: worktree '$WORK_DIR' was not created; skipped Gita registration."
+        exit 1
+      fi
+      ABS_DIR="$(cd "$WORK_DIR" && pwd -P)"
       (
         flock -x 200
-        gita add "$WORK_DIR" >/dev/null 2>&1
-        gita group add "$SLUG" "$WORK_DIR" >/dev/null 2>&1 || true
+        gita add "$ABS_DIR" >/dev/null 2>&1
+        for NAME in $(gita ls); do
+          if [ "$(gita ls "$NAME")" = "$ABS_DIR" ]; then
+            gita group add -n "${WORKSPACE}-${SLUG}" "$NAME" >/dev/null
+            break
+          fi
+        done
       ) 200>/tmp/gita-mani.lock
 
   pull-work:
@@ -59,7 +86,10 @@ tasks:
     cmd: |
       SLUG="${slug:?Specify slug}"
       REPO_NAME="$(basename "$PWD")"
-      WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
+      # Qualified by workspace: Gita names a worktree by its last two path parts, so this keeps
+      # same-named repos in different workspaces from colliding in Gita.
+      WORKSPACE="$(basename "$(dirname "$PWD")")"
+      WORK_DIR="./Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
 
       if [ ! -d "$WORK_DIR" ]; then exit 0; fi
 
@@ -73,7 +103,10 @@ tasks:
     cmd: |
       SLUG="${slug:?Specify slug}"
       REPO_NAME="$(basename "$PWD")"
-      WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
+      # Qualified by workspace: Gita names a worktree by its last two path parts, so this keeps
+      # same-named repos in different workspaces from colliding in Gita.
+      WORKSPACE="$(basename "$(dirname "$PWD")")"
+      WORK_DIR="./Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
 
       if [ ! -d "$WORK_DIR" ]; then exit 0; fi
 
@@ -86,7 +119,10 @@ tasks:
     cmd: |
       SLUG="${slug:?Specify slug}"
       REPO_NAME="$(basename "$PWD")"
-      WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
+      # Qualified by workspace: Gita names a worktree by its last two path parts, so this keeps
+      # same-named repos in different workspaces from colliding in Gita.
+      WORKSPACE="$(basename "$(dirname "$PWD")")"
+      WORK_DIR="./Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
 
       if [ ! -d "$WORK_DIR" ]; then exit 0; fi
 
@@ -108,7 +144,10 @@ tasks:
     cmd: |
       SLUG="${slug:?Specify slug to remove, e.g. mani run clean-work slug=jira-101}"
       REPO_NAME="$(basename "$PWD")"
-      WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
+      # Qualified by workspace: Gita names a worktree by its last two path parts, so this keeps
+      # same-named repos in different workspaces from colliding in Gita.
+      WORKSPACE="$(basename "$(dirname "$PWD")")"
+      WORK_DIR="./Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
 
       if [ ! -d "$WORK_DIR" ]; then exit 0; fi
 
@@ -137,9 +176,25 @@ tasks:
         fail_and_advise "Branch '$BRANCH' is ahead of remote by $AHEAD commits."
       fi
 
-      git worktree remove "$WORK_DIR" 2>/dev/null || fail_and_advise "Git blocked removal."
+      # Unregister from Gita first: it hides repos whose folder is gone, so they can't be removed
+      # afterwards. `gita rm` also drops the repo from every group (and empty groups). If git then
+      # refuses to remove the worktree, register it again.
+      ABS_DIR="$(cd "$WORK_DIR" && pwd -P)"
+      ( flock -x 200
+        for NAME in $(gita ls); do
+          if [ "$(gita ls "$NAME")" = "$ABS_DIR" ]; then gita rm "$NAME" >/dev/null 2>&1; break; fi
+        done
+      ) 200>/tmp/gita-mani.lock
 
-      ( flock -x 200; gita clean >/dev/null 2>&1 || true ) 200>/tmp/gita-mani.lock
+      if ! git worktree remove "$WORK_DIR" 2>/dev/null; then
+        ( flock -x 200
+          gita add "$ABS_DIR" >/dev/null 2>&1
+          for NAME in $(gita ls); do
+            if [ "$(gita ls "$NAME")" = "$ABS_DIR" ]; then gita group add -n "${WORKSPACE}-${SLUG}" "$NAME" >/dev/null; break; fi
+          done
+        ) 200>/tmp/gita-mani.lock
+        fail_and_advise "Git blocked removal."
+      fi
 
       echo "✅ [$REPO_NAME]: Cleaned successfully."
 
@@ -150,12 +205,21 @@ tasks:
     cmd: |
       SLUG="${slug:?Specify slug}"
       REPO_NAME="$(basename "$PWD")"
-      WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
+      # Qualified by workspace: Gita names a worktree by its last two path parts, so this keeps
+      # same-named repos in different workspaces from colliding in Gita.
+      WORKSPACE="$(basename "$(dirname "$PWD")")"
+      WORK_DIR="./Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
 
       if [ ! -d "$WORK_DIR" ]; then exit 0; fi
 
-      git worktree remove "$WORK_DIR" --force 2>/dev/null || true
+      # Unregister from Gita before the folder disappears (see clean-work).
+      ABS_DIR="$(cd "$WORK_DIR" && pwd -P)"
+      ( flock -x 200
+        for NAME in $(gita ls); do
+          if [ "$(gita ls "$NAME")" = "$ABS_DIR" ]; then gita rm "$NAME" >/dev/null 2>&1; break; fi
+        done
+      ) 200>/tmp/gita-mani.lock
 
-      ( flock -x 200; gita clean >/dev/null 2>&1 || true ) 200>/tmp/gita-mani.lock
+      git worktree remove "$WORK_DIR" --force 2>/dev/null || true
 
       echo "⚠️  [$REPO_NAME]: Forcefully removed."
