@@ -23,17 +23,22 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-DO_SNAPSHOT=1; GREEDY=0; DO_CLEANUP=1
+DO_SNAPSHOT=1
+GREEDY=0
+DO_CLEANUP=1
 for arg in "$@"; do
   case "$arg" in
     --no-snapshot) DO_SNAPSHOT=0 ;;
-    --greedy)      GREEDY=1 ;;
-    --no-cleanup)  DO_CLEANUP=0 ;;
-    *) echo "unknown flag: $arg" >&2; exit 2 ;;
+    --greedy) GREEDY=1 ;;
+    --no-cleanup) DO_CLEANUP=0 ;;
+    *)
+      echo "unknown flag: $arg" >&2
+      exit 2
+      ;;
   esac
 done
 
-log()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
+log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m!!\033[0m %s\n' "$*" >&2; }
 
 # --- 1. snapshot (config only — see header note) ---

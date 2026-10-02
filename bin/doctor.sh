@@ -11,9 +11,16 @@ DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 ZDOTDIR_TARGET="$CONFIG_HOME/zsh"
 GHOSTTY_DIR="$HOME/Library/Application Support/com.mitchellh.ghostty"
 
-PASS=0; FAIL=0
-ok()   { printf '  \033[1;32m✓\033[0m %s\n' "$*"; PASS=$((PASS+1)); }
-bad()  { printf '  \033[1;31m✗\033[0m %s\n' "$*"; FAIL=$((FAIL+1)); }
+PASS=0
+FAIL=0
+ok() {
+  printf '  \033[1;32m✓\033[0m %s\n' "$*"
+  PASS=$((PASS + 1))
+}
+bad() {
+  printf '  \033[1;31m✗\033[0m %s\n' "$*"
+  FAIL=$((FAIL + 1))
+}
 info() { printf '  \033[1;34mi\033[0m %s\n' "$*"; }
 head() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 
@@ -45,15 +52,15 @@ else
   ok "${ZDOTDIR_TARGET/#$HOME/~} is a real directory"
 fi
 
-check_copy "$REPO/home/zshenv"            "$HOME/.zshenv"
-check_copy "$REPO/home/zprofile"          "$HOME/.zprofile"
+check_copy "$REPO/home/zshenv" "$HOME/.zshenv"
+check_copy "$REPO/home/zprofile" "$HOME/.zprofile"
 check_copy "$REPO/starship/starship.toml" "$CONFIG_HOME/starship.toml"
-check_copy "$REPO/tmux/tmux.conf"          "$CONFIG_HOME/tmux/tmux.conf"
+check_copy "$REPO/tmux/tmux.conf" "$CONFIG_HOME/tmux/tmux.conf"
 check_copy "$REPO/ghostty/config.ghostty" "$GHOSTTY_DIR/config.ghostty"
-check_copy "$REPO/config/.zshrc"          "$ZDOTDIR_TARGET/.zshrc"
-check_copy "$REPO/config/.zshenv"         "$ZDOTDIR_TARGET/.zshenv"
+check_copy "$REPO/config/.zshrc" "$ZDOTDIR_TARGET/.zshrc"
+check_copy "$REPO/config/.zshenv" "$ZDOTDIR_TARGET/.zshenv"
 check_copy "$REPO/config/local-secrets.zsh" "$ZDOTDIR_TARGET/local-secrets.zsh"
-check_copy "$REPO/mani/tasks.yaml"        "$CONFIG_HOME/mani/tasks.yaml"
+check_copy "$REPO/mani/tasks.yaml" "$CONFIG_HOME/mani/tasks.yaml"
 
 # $HOME must hold no zsh config beyond the managed stubs. A leftover pre-migration
 # ~/.zshrc is ignored while ZDOTDIR is set, but would take effect if ~/.zshenv were lost.
@@ -71,7 +78,7 @@ if [[ ! -d "$ZSHD" ]]; then
   bad "${ZSHD/#$HOME/~} missing — re-run install.sh"
 else
   for src in "$REPO"/config/[0-9][0-9]-*.zsh; do
-    [[ -e "$src" ]] || continue          # no fragments in repo (shouldn't happen)
+    [[ -e "$src" ]] || continue # no fragments in repo (shouldn't happen)
     base="$(basename "$src")"
     dst="$ZSHD/$base"
     if [[ ! -e "$dst" ]]; then
@@ -83,7 +90,7 @@ else
     fi
   done
   for dst in "$ZSHD"/[0-9][0-9]-*.zsh; do
-    [[ -e "$dst" ]] || continue          # empty zsh.d/
+    [[ -e "$dst" ]] || continue # empty zsh.d/
     base="$(basename "$dst")"
     [[ -e "$REPO/config/$base" ]] || bad "zsh.d/$base stale (not in repo) — re-run install.sh"
   done

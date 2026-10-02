@@ -17,17 +17,22 @@ DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 ZDOTDIR_TARGET="$CONFIG_HOME/zsh"
 GHOSTTY_DIR="$HOME/Library/Application Support/com.mitchellh.ghostty"
 
-DO_BREW=1; DO_SNAPSHOT=1; DO_PRIME=1
+DO_BREW=1
+DO_SNAPSHOT=1
+DO_PRIME=1
 for arg in "$@"; do
   case "$arg" in
-    --no-brew)     DO_BREW=0 ;;
+    --no-brew) DO_BREW=0 ;;
     --no-snapshot) DO_SNAPSHOT=0 ;;
-    --skip-prime)  DO_PRIME=0 ;;
-    *) echo "unknown flag: $arg" >&2; exit 2 ;;
+    --skip-prime) DO_PRIME=0 ;;
+    *)
+      echo "unknown flag: $arg" >&2
+      exit 2
+      ;;
   esac
 done
 
-log()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
+log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m!!\033[0m %s\n' "$*" >&2; }
 
 sha() { shasum -a 256 "$1" 2>/dev/null | awk '{print $1}'; }
@@ -103,7 +108,8 @@ if [[ $DO_BREW -eq 1 ]]; then
   # `uv tool install` is idempotent.
   if command -v uv >/dev/null 2>&1; then
     for entry in "gita:gita" "nox:nox" "virtualenv:virtualenv" "headroom-ai[all]:headroom"; do
-      pkg="${entry%%:*}"; cli="${entry##*:}"
+      pkg="${entry%%:*}"
+      cli="${entry##*:}"
       if command -v "$cli" >/dev/null 2>&1; then
         log "uv tool present: $pkg"
       else
@@ -164,10 +170,10 @@ for p in "$ZDOTDIR_TARGET"/*.zsh "$ZDOTDIR_TARGET/.zshrc" "$ZDOTDIR_TARGET/.zshe
 done
 
 # $HOME stubs + driver files + starship (all self-contained copies).
-copy_file "$REPO/home/zshenv"          "$HOME/.zshenv"
-copy_file "$REPO/home/zprofile"        "$HOME/.zprofile"
-copy_file "$REPO/config/.zshrc"        "$ZDOTDIR_TARGET/.zshrc"
-copy_file "$REPO/config/.zshenv"       "$ZDOTDIR_TARGET/.zshenv"
+copy_file "$REPO/home/zshenv" "$HOME/.zshenv"
+copy_file "$REPO/home/zprofile" "$HOME/.zprofile"
+copy_file "$REPO/config/.zshrc" "$ZDOTDIR_TARGET/.zshrc"
+copy_file "$REPO/config/.zshenv" "$ZDOTDIR_TARGET/.zshenv"
 copy_file "$REPO/starship/starship.toml" "$CONFIG_HOME/starship.toml"
 copy_file "$REPO/config/local-secrets.zsh" "$ZDOTDIR_TARGET/local-secrets.zsh"
 mkdir -p "$CONFIG_HOME/tmux"
@@ -215,8 +221,8 @@ log "rebuilt ~/.config/zsh/zsh.d (fragments copied)"
 # git fails fast instead of blocking on a credential prompt in a headless/CI run.
 if [[ $DO_PRIME -eq 1 && -t 0 ]]; then
   log "Priming znap plugin clones (first run may take a moment)…"
-  GIT_TERMINAL_PROMPT=0 ZDOTDIR="$ZDOTDIR_TARGET" zsh -i -c 'exit' \
-    || warn "Plugin priming returned non-zero; check a fresh shell."
+  GIT_TERMINAL_PROMPT=0 ZDOTDIR="$ZDOTDIR_TARGET" zsh -i -c 'exit' ||
+    warn "Plugin priming returned non-zero; check a fresh shell."
 elif [[ $DO_PRIME -eq 1 ]]; then
   warn "No TTY; skipping plugin priming. First interactive shell will clone plugins."
 fi

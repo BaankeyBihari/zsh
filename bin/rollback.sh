@@ -20,7 +20,7 @@ CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 ZDOTDIR_TARGET="$CONFIG_HOME/zsh"
 GHOSTTY_DIR="$HOME/Library/Application Support/com.mitchellh.ghostty"
 
-log()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
+log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m!!\033[0m %s\n' "$*" >&2; }
 
 # Guarded `rm -rf` (mirrors install.sh): refuse anything that isn't a real (non-symlink)
@@ -58,12 +58,19 @@ fi
 
 if [[ "$TS" == "latest" ]]; then
   TS="$(ls -1 "$SNAP_ROOT" 2>/dev/null | sort | tail -n1 || true)"
-  [[ -z "$TS" ]] && { warn "No snapshots to restore."; exit 1; }
+  [[ -z "$TS" ]] && {
+    warn "No snapshots to restore."
+    exit 1
+  }
   log "Latest snapshot: $TS"
 fi
 
 SNAP="$SNAP_ROOT/$TS"
-[[ -f "$SNAP/manifest.json" ]] || { warn "No snapshot at $SNAP"; list_snapshots; exit 1; }
+[[ -f "$SNAP/manifest.json" ]] || {
+  warn "No snapshot at $SNAP"
+  list_snapshots
+  exit 1
+}
 
 # --- 1. remove managed paths ---
 # Managed config is now plain copies (older machines may still have symlinks). Remove the
@@ -97,11 +104,11 @@ restore() {
   log "restored ${dest/#$HOME/~}"
 }
 
-restore "home/.zshenv"   "$HOME/.zshenv"
-restore "home/.zshrc"    "$HOME/.zshrc"
+restore "home/.zshenv" "$HOME/.zshenv"
+restore "home/.zshrc" "$HOME/.zshrc"
 restore "home/.zprofile" "$HOME/.zprofile"
-restore "starship.toml"  "$CONFIG_HOME/starship.toml"
-restore "tmux.conf"      "$CONFIG_HOME/tmux/tmux.conf"
+restore "starship.toml" "$CONFIG_HOME/starship.toml"
+restore "tmux.conf" "$CONFIG_HOME/tmux/tmux.conf"
 restore "ghostty.config" "$GHOSTTY_DIR/config.ghostty"
 
 if [[ -d "$SNAP/config-zsh" ]] && compgen -G "$SNAP/config-zsh/*" >/dev/null; then

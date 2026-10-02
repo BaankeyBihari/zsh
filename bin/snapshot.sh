@@ -38,8 +38,8 @@ capture_file() {
   fi
 }
 
-capture_file "$HOME/.zshenv"   "$DEST/home/.zshenv"   "home/.zshenv"
-capture_file "$HOME/.zshrc"    "$DEST/home/.zshrc"    "home/.zshrc"
+capture_file "$HOME/.zshenv" "$DEST/home/.zshenv" "home/.zshenv"
+capture_file "$HOME/.zshrc" "$DEST/home/.zshrc" "home/.zshrc"
 capture_file "$HOME/.zprofile" "$DEST/home/.zprofile" "home/.zprofile"
 capture_file "$HOME/.config/starship.toml" "$DEST/starship.toml" "config/starship.toml"
 capture_file "$HOME/.config/tmux/tmux.conf" "$DEST/tmux.conf" "config/tmux.conf"
@@ -66,6 +66,6 @@ repo_head="$(git -C "$REPO" rev-parse HEAD 2>/dev/null || echo "no-git")"
   done
   printf '\n  ]\n'
   printf '}\n'
-} > "$DEST/manifest.json"
+} >"$DEST/manifest.json"
 
 echo "$TS"
