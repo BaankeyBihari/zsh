@@ -52,7 +52,7 @@ a `validator:` (shell command/script) that `tokens validate` runs; it never runs
 | Ghostty font / keybinds          | `ghostty/config.ghostty` (theme is runtime state: `ghosttytheme` writes an unmanaged `theme` file beside it) |
 | A provisioned tool/app           | `Brewfile`                             |
 | A dev tool / `mise run` task     | `mise.toml`                            |
-| Global `mani` tasks (sync/create-work) | `mani/tasks.yaml`                |
+| Global `mani` tasks (sync, create/pull/push/rebase/clean-work) | `mani/tasks.yaml`                |
 | The `$HOME` stub or `ZDOTDIR`    | `home/zshenv`                          |
 | A derived value (`docker context`) or plain flag | `config/local-exports.zsh` (tracked — no literal secrets) |
 | A keychain-backed env var (provisioned) | `config/tokens-map.yaml` (`managed:` section; installed to `~/.config/tokens/map.yaml`) |

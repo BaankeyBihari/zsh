@@ -20,6 +20,7 @@ brew "gh"
 brew "pre-commit"   # manage git pre-commit hooks (.pre-commit-config.yaml)
 brew "mise"         # mise.toml: pinned dev tools + `mise run` tasks
 brew "mani"         # run commands / sync config across multiple repos
+brew "flock"        # file locks for mani tasks (mani/tasks.yaml serializes gita registration)
 
 # Productivity
 brew "bat"         # cat with syntax highlighting; guarded `cat` alias in 70-aliases.zsh

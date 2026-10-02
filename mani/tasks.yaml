@@ -1,9 +1,11 @@
 tasks:
   sync:
-    desc: "Update reference repos (safe for local-only repos)"
+    desc: "Update reference repos (safe for local-only repos) and register to Gita"
     spec:
       parallel: true
     cmd: |
+      REPO_NAME="$(basename "$PWD")"
+
       # 1. Switch to default branch
       DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
       DEFAULT_BRANCH=${DEFAULT_BRANCH:-main}
@@ -13,18 +15,147 @@ tasks:
       if git remote | grep -q 'origin'; then
         git pull --ff-only
       else
-        echo "Local-only repo ($MANI_PROJECT_NAME): skipped network pull."
+        echo "Local-only repo ($REPO_NAME): skipped network pull."
       fi
 
+      # 3. Register base repo to Gita using file lock
+      (
+        flock -x 200
+        gita add . >/dev/null 2>&1
+        gita group add reference . >/dev/null 2>&1 || true
+      ) 200>/tmp/gita-mani.lock
+
   create-work:
-    desc: "Spin up Work/Work-{slug} environment across ALL repos (remote & local)"
+    desc: "Spin up Work/Work-{slug} environment across ALL repos and set upstream"
     spec:
       parallel: true
     cmd: |
       SLUG="${slug:?Specify slug, e.g. mani run create-work slug=jira-101}"
-      REPO_NAME="$(basename $MANI_PROJECT_PATH)"
+      REPO_NAME="$(basename "$PWD")"
       WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
 
-      git worktree add -b "$SLUG" "$WORK_DIR" main 2>/dev/null \
-      || git worktree add -b "$SLUG" "$WORK_DIR" master 2>/dev/null \
-      || git worktree add "$WORK_DIR" "$SLUG"
+      # Create new branch or fallback to restoring an existing one
+      if git worktree add -b "$SLUG" "$WORK_DIR" main 2>/dev/null || git worktree add -b "$SLUG" "$WORK_DIR" master 2>/dev/null; then
+        # If it's a NEW branch, immediately set upstream tracking if 'origin' exists
+        if git remote | grep -q 'origin'; then
+          git -C "$WORK_DIR" push -u origin "$SLUG" >/dev/null 2>&1 || echo "⚠️ [$REPO_NAME]: Initial upstream push skipped (repo might be empty)."
+        fi
+      else
+        # Fallback to creating worktree for an already existing branch
+        git worktree add "$WORK_DIR" "$SLUG" 2>/dev/null
+      fi
+
+      # Register with Gita safely using a file lock
+      (
+        flock -x 200
+        gita add "$WORK_DIR" >/dev/null 2>&1
+        gita group add "$SLUG" "$WORK_DIR" >/dev/null 2>&1 || true
+      ) 200>/tmp/gita-mani.lock
+
+  pull-work:
+    desc: "Pull upstream changes into worktree (fast-forward only)"
+    spec:
+      parallel: true
+    cmd: |
+      SLUG="${slug:?Specify slug}"
+      REPO_NAME="$(basename "$PWD")"
+      WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
+
+      if [ ! -d "$WORK_DIR" ]; then exit 0; fi
+
+      echo "⬇️  [$REPO_NAME]: Pulling --ff-only..."
+      git -C "$WORK_DIR" pull --ff-only
+
+  push-work:
+    desc: "Push worktree changes to upstream remote"
+    spec:
+      parallel: true
+    cmd: |
+      SLUG="${slug:?Specify slug}"
+      REPO_NAME="$(basename "$PWD")"
+      WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
+
+      if [ ! -d "$WORK_DIR" ]; then exit 0; fi
+
+      echo "⬆️  [$REPO_NAME]: Pushing to remote..."
+      git -C "$WORK_DIR" push
+
+  rebase-work:
+    desc: "Rebase worktree branch against the local default branch (main/master)"
+    # Not parallel on purpose, so rebase conflicts don't mangle terminal output.
+    cmd: |
+      SLUG="${slug:?Specify slug}"
+      REPO_NAME="$(basename "$PWD")"
+      WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
+
+      if [ ! -d "$WORK_DIR" ]; then exit 0; fi
+
+      # Determine the default branch for this specific repo
+      DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+      DEFAULT_BRANCH=${DEFAULT_BRANCH:-main}
+
+      echo "🔄 [$REPO_NAME]: Rebasing onto $DEFAULT_BRANCH..."
+      git -C "$WORK_DIR" rebase "$DEFAULT_BRANCH" || {
+        echo "❌ [$REPO_NAME]: Rebase conflict! Halting."
+        echo "💡 Go to $WORK_DIR and run 'git rebase --continue' or 'git rebase --abort'."
+        exit 1
+      }
+
+  clean-work:
+    desc: "Safely remove worktrees (skips dirty/unpushed repos, parallel execution)"
+    spec:
+      parallel: true
+    cmd: |
+      SLUG="${slug:?Specify slug to remove, e.g. mani run clean-work slug=jira-101}"
+      REPO_NAME="$(basename "$PWD")"
+      WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
+
+      if [ ! -d "$WORK_DIR" ]; then exit 0; fi
+
+      fail_and_advise() {
+        echo "❌ [$REPO_NAME]: $1"
+        echo "💡 To restore removed worktrees for this slug, run: mani run create-work slug=$SLUG"
+        exit 1
+      }
+
+      # 1. Check for uncommitted changes
+      if [ -n "$(git -C "$WORK_DIR" status --porcelain)" ]; then
+        fail_and_advise "Uncommitted changes in '$WORK_DIR'."
+      fi
+
+      # 2. Check if branch has an upstream
+      BRANCH=$(git -C "$WORK_DIR" rev-parse --abbrev-ref HEAD)
+      UPSTREAM=$(git -C "$WORK_DIR" rev-parse --abbrev-ref @{upstream} 2>/dev/null)
+
+      if [ -z "$UPSTREAM" ]; then
+        fail_and_advise "Branch '$BRANCH' has no remote upstream."
+      fi
+
+      # 3. Check if local branch is ahead of remote
+      AHEAD=$(git -C "$WORK_DIR" rev-list --left-right --count HEAD...$UPSTREAM 2>/dev/null | awk '{print $1}')
+      if [ "$AHEAD" -gt 0 ]; then
+        fail_and_advise "Branch '$BRANCH' is ahead of remote by $AHEAD commits."
+      fi
+
+      git worktree remove "$WORK_DIR" 2>/dev/null || fail_and_advise "Git blocked removal."
+
+      ( flock -x 200; gita clean >/dev/null 2>&1 || true ) 200>/tmp/gita-mani.lock
+
+      echo "✅ [$REPO_NAME]: Cleaned successfully."
+
+  clean-work-forced:
+    desc: "Force remove worktree environment and clean up Gita (DESTROYS UNPUSHED WORK)"
+    spec:
+      parallel: true
+    cmd: |
+      SLUG="${slug:?Specify slug}"
+      REPO_NAME="$(basename "$PWD")"
+      WORK_DIR="./Work/Work-${SLUG}/${REPO_NAME}"
+
+      if [ ! -d "$WORK_DIR" ]; then exit 0; fi
+
+      git worktree remove "$WORK_DIR" --force 2>/dev/null || true
+
+      ( flock -x 200; gita clean >/dev/null 2>&1 || true ) 200>/tmp/gita-mani.lock
+
+      echo "⚠️  [$REPO_NAME]: Forcefully removed."

@@ -29,7 +29,7 @@ starship/  → ~/.config/starship.toml
 tmux/      → ~/.config/tmux/tmux.conf      (status bar + mouse/focus/clipboard + split binds; per-agent logo from session-name prefix)
 ghostty/   → ~/Library/Application Support/com.mitchellh.ghostty/config.ghostty
              (font, tabs, quick terminal; cmd+d/cmd+shift+e/f/cmd+alt+arrows send tmux split binds)
-mani/      → ~/.config/mani/tasks.yaml     (global sync/create-work tasks, imported by
+mani/      → ~/.config/mani/tasks.yaml     (global sync/create-work/pull-work/push-work/rebase-work/clean-work tasks, registered in Gita; imported by
              each project's own mani.yaml)
 Brewfile     provisioned tools/apps
 bin/         install · update · snapshot · rollback · uninstall · doctor

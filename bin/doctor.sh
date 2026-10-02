@@ -121,7 +121,7 @@ fi
 
 # --- tools ---
 head "Tools"
-for t in zsh git starship uv; do
+for t in zsh git starship uv mani gita flock; do
   if command -v "$t" >/dev/null 2>&1; then ok "$t: $(command -v "$t")"; else bad "$t not found"; fi
 done
 
