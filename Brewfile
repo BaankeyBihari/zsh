@@ -62,7 +62,7 @@ cask "localstack/tap/lstk"
 cask "ghostty"    # config/85-ghosttytheme.zsh drives it — must be provisioned
 
 # Nerd Font — required glyphs for the starship pastel-powerline prompt.
-# Ghostty: set `font-family = MesloLGS Nerd Font` in ~/.config/ghostty/config.
+# Ghostty: ghostty/config.ghostty sets `font-family = "MesloLGS Nerd Font Mono"`.
 cask "font-meslo-lg-nerd-font"
 
 # Apps

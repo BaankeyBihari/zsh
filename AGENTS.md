@@ -43,7 +43,8 @@ safe to commit since no literal secret ever lands in the file.
 | A plugin                         | `config/40-plugins.zsh` (`znap source …`) |
 | An alias / function              | `config/70-aliases.zsh` / `80-functions.zsh` |
 | The prompt                       | `starship/starship.toml`               |
-| The tmux status bar / mouse      | `tmux/tmux.conf`                       |
+| The tmux status bar / mouse / splits | `tmux/tmux.conf`                   |
+| Ghostty font / keybinds          | `ghostty/config.ghostty` (theme is runtime state: `ghosttytheme` writes an unmanaged `theme` file beside it) |
 | A provisioned tool/app           | `Brewfile`                             |
 | Global `mani` tasks (sync/create-work) | `mani/tasks.yaml`                |
 | The `$HOME` stub or `ZDOTDIR`    | `home/zshenv`                          |
@@ -107,7 +108,9 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
   Routed launches run inside tmux via `_tmux_attach_or_run`: it resumes the session
   already running for the current directory (git repos match by
   `git rev-parse --show-toplevel`, so any subdirectory finds it), prompts with `fzf`
-  when several match, or starts a new session when none do. `agy` (Antigravity CLI) gets
+  when several match, or starts a new session when none do. Already inside tmux (`$TMUX`) it
+  runs the agent in the current pane — pane splits are tmux's (`prefix`+`|`/`-`), triggered from
+  Ghostty's `cmd+d>s`/`cmd+d>v` chords (`text:\x02…` shims in `ghostty/config.ghostty`). `agy` (Antigravity CLI) gets
   the same tmux backing but no Headroom routing/proxy check; `-p`/`--print` and subcommands stay direct.
 - **Some tool config lives outside this repo's substrate**: delta is wired as git pager via
   `git config --global` (`~/.gitconfig`) — not snapshot-protected; undo with

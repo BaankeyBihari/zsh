@@ -139,14 +139,16 @@ toggle-headroom() {
 # physical pane_current_path). tmux tracks each pane's live cwd itself, so no
 # manual path-tagging is needed.
 # 0 matches -> new session. 1 -> attach. 2+ -> pick via fzf. No tmux installed
-# -> run $cmd directly, same as before this existed. The scan-then-create
+# -> run $cmd directly, same as before this existed. Already inside tmux ($TMUX)
+# -> also run $cmd directly, in the current pane: that is how an agent starts in
+# a split pane instead of switching to another session. The scan-then-create
 # window is flock'd per tool+dir (zsh/system, no new dependency) so two
 # near-simultaneous launches from the same place resume each other instead of
 # both creating a session -- lock lives in $TMPDIR, not $HOME: it's only
 # needed for this instant, nothing to clean up afterward.
 _tmux_attach_or_run() {
   local tool="$1" cmd="$2"
-  if ! command -v tmux >/dev/null 2>&1; then
+  if ! command -v tmux >/dev/null 2>&1 || [[ -n "$TMUX" ]]; then
     eval "$cmd"
     return
   fi
@@ -187,11 +189,7 @@ _tmux_attach_or_run() {
   }
   [[ -n "$name" ]] || return 1
 
-  if [[ -n "$TMUX" ]]; then
-    tmux switch-client -t "$name"
-  else
-    tmux attach -t "$name"
-  fi
+  tmux attach -t "$name"
 }
 
 # claude — wrapper that routes the CLI through the local Headroom proxy. Unlike

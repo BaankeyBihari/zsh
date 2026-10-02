@@ -1,0 +1,68 @@
+# --- Shell Integrations ---
+shell-integration = zsh
+
+# --- Window & Process Behavior ---
+quit-after-last-window-closed = true
+
+# --- Theme and Appearance ---
+# Run 'ghostty +list-themes' in your terminal to see all options
+theme = Red Sands
+background-opacity = 0.90
+background-blur = 90
+background-blur-radius = 20
+
+# --- Typography ---
+font-family = "MesloLGS Nerd Font Mono"
+font-size = 14
+font-feature = -calt
+adjust-cell-height=35%
+
+# --- Window Layout ---
+window-padding-x = 12
+window-padding-y = 12
+window-padding-balance = true
+window-decoration = true
+
+# --- Quick Terminal (Quake Mode) ---
+quick-terminal-position = top
+quick-terminal-screen = main
+quick-terminal-autohide = true
+
+# --- Cursor ---
+cursor-style = block
+cursor-style-blink = true
+
+# --- Copy ---
+copy-on-select = clipboard
+
+# --- SAND Keybindings for Ghostty (Arrow Keys Variant) ---
+
+# Global Quick Terminal (Toggle from anywhere with Cmd + `)
+keybind = global:cmd+grave_accent=toggle_quick_terminal
+
+# Splits live in tmux, not Ghostty: these chords send the tmux prefix (C-b = \x02)
+# plus the tmux key (see tmux/tmux.conf). Outside tmux they type stray characters.
+
+# --- S: Split Right (or Down) ---
+keybind = cmd+d>s=text:\x02|
+keybind = cmd+d>v=text:\x02-
+
+# --- A: Arrange & Resize Splits ---
+keybind = cmd+shift+e=text:\x02E
+keybind = cmd+shift+f=text:\x02z
+
+# --- N: Navigate Splits and Tabs ---
+keybind = cmd+shift+left=previous_tab
+keybind = cmd+shift+right=next_tab
+keybind = cmd+alt+up=text:\x02\x1b[A
+keybind = cmd+alt+down=text:\x02\x1b[B
+keybind = cmd+alt+left=text:\x02\x1b[D
+keybind = cmd+alt+right=text:\x02\x1b[C
+
+# --- D: Duplicate / Close ---
+keybind = cmd+t=new_tab
+keybind = cmd+w=close_surface
+
+# Optional include, loaded last: `ghosttytheme` writes the picked theme here (unmanaged,
+# so a theme change is not repo drift). Overrides `theme` above.
+config-file = ?theme

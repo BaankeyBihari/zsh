@@ -15,6 +15,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 ZDOTDIR_TARGET="$CONFIG_HOME/zsh"
+GHOSTTY_DIR="$HOME/Library/Application Support/com.mitchellh.ghostty"
 
 DO_BREW=1; DO_SNAPSHOT=1; DO_PRIME=1
 for arg in "$@"; do
@@ -171,6 +172,8 @@ copy_file "$REPO/starship/starship.toml" "$CONFIG_HOME/starship.toml"
 copy_file "$REPO/config/local-secrets.zsh" "$ZDOTDIR_TARGET/local-secrets.zsh"
 mkdir -p "$CONFIG_HOME/tmux"
 copy_file "$REPO/tmux/tmux.conf" "$CONFIG_HOME/tmux/tmux.conf"
+mkdir -p "$GHOSTTY_DIR"
+copy_file "$REPO/ghostty/config.ghostty" "$GHOSTTY_DIR/config.ghostty"
 mkdir -p "$CONFIG_HOME/mani"
 copy_file "$REPO/mani/tasks.yaml" "$CONFIG_HOME/mani/tasks.yaml"
 

@@ -8,7 +8,7 @@
 #
 # Restore procedure:
 #   1. Remove repo-managed paths (whether copies or legacy symlinks) at ~/.zshenv,
-#      ~/.zprofile, ~/.config/starship.toml, ~/.config/tmux/tmux.conf, and the whole ~/.config/zsh/ tree.
+#      ~/.zprofile, ~/.config/starship.toml, ~/.config/tmux/tmux.conf, the Ghostty config.ghostty, and the whole ~/.config/zsh/ tree.
 #   2. Copy the captured originals back to their origin paths from the snapshot.
 #   3. Syntax-check restored zsh files with `zsh -n`.
 
@@ -18,6 +18,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SNAP_ROOT="$REPO/snapshots"
 CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 ZDOTDIR_TARGET="$CONFIG_HOME/zsh"
+GHOSTTY_DIR="$HOME/Library/Application Support/com.mitchellh.ghostty"
 
 log()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m!!\033[0m %s\n' "$*" >&2; }
@@ -84,6 +85,7 @@ remove_managed "$HOME/.zshenv"
 remove_managed "$HOME/.zprofile"
 remove_managed "$CONFIG_HOME/starship.toml"
 remove_managed "$CONFIG_HOME/tmux/tmux.conf"
+remove_managed "$GHOSTTY_DIR/config.ghostty"
 
 # --- 2. restore captured originals ---
 restore() {
@@ -100,6 +102,7 @@ restore "home/.zshrc"    "$HOME/.zshrc"
 restore "home/.zprofile" "$HOME/.zprofile"
 restore "starship.toml"  "$CONFIG_HOME/starship.toml"
 restore "tmux.conf"      "$CONFIG_HOME/tmux/tmux.conf"
+restore "ghostty.config" "$GHOSTTY_DIR/config.ghostty"
 
 if [[ -d "$SNAP/config-zsh" ]] && compgen -G "$SNAP/config-zsh/*" >/dev/null; then
   # Purge the current tree first so the restore is exact — no stale zsh.d/ fragments or

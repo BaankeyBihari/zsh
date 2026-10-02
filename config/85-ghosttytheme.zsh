@@ -1,7 +1,8 @@
 # ghosttytheme — Ghostty color-scheme switcher.
 #
-# Writes `theme = <name>` to ~/.config/ghostty/config and sends SIGUSR2 so all
-# open Ghostty windows reload. Changes persist across restarts (Ghostty has no
+# Writes `theme = <name>` to an unmanaged `theme` file next to the repo-managed
+# config.ghostty (which pulls it in via `config-file = ?theme`, so a theme change is
+# never drift) and sends SIGUSR2 so all open Ghostty windows reload. Changes persist across restarts (Ghostty has no
 # stateless palette-escape equivalent).
 #
 #   ghosttytheme <name>    apply a theme by name (case-insensitive prefix ok)
@@ -10,11 +11,13 @@
 #   ghosttytheme random    apply a random theme
 #   ghosttytheme list      print available theme names
 
-_GHOSTTYTHEME_CFG="${GHOSTTY_CONFIG:-$HOME/.config/ghostty/config}"
+_GHOSTTYTHEME_CFG="${GHOSTTY_CONFIG:-$HOME/Library/Application Support/com.mitchellh.ghostty/theme}"
 
-# Strip ANSI codes in case `ghostty +list-themes` adds colour in future versions.
+# Strip ANSI codes in case `ghostty +list-themes` adds colour in future versions, and the
+# trailing " (resources)"/" (user)" source tag it prints — it is not part of the theme name.
 _ghosttytheme_list() {
-  ghostty +list-themes 2>/dev/null | sed $'s/\x1b\\[[0-9;]*m//g' | grep -v '^[[:space:]]*$'
+  ghostty +list-themes 2>/dev/null | sed $'s/\x1b\\[[0-9;]*m//g' \
+    | sed -E 's/ \((resources|user)\)$//' | grep -v '^[[:space:]]*$'
 }
 
 _ghosttytheme_current() {

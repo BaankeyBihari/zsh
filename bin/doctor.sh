@@ -9,6 +9,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 ZDOTDIR_TARGET="$CONFIG_HOME/zsh"
+GHOSTTY_DIR="$HOME/Library/Application Support/com.mitchellh.ghostty"
 
 PASS=0; FAIL=0
 ok()   { printf '  \033[1;32m✓\033[0m %s\n' "$*"; PASS=$((PASS+1)); }
@@ -48,6 +49,7 @@ check_copy "$REPO/home/zshenv"            "$HOME/.zshenv"
 check_copy "$REPO/home/zprofile"          "$HOME/.zprofile"
 check_copy "$REPO/starship/starship.toml" "$CONFIG_HOME/starship.toml"
 check_copy "$REPO/tmux/tmux.conf"          "$CONFIG_HOME/tmux/tmux.conf"
+check_copy "$REPO/ghostty/config.ghostty" "$GHOSTTY_DIR/config.ghostty"
 check_copy "$REPO/config/.zshrc"          "$ZDOTDIR_TARGET/.zshrc"
 check_copy "$REPO/config/.zshenv"         "$ZDOTDIR_TARGET/.zshenv"
 check_copy "$REPO/config/local-secrets.zsh" "$ZDOTDIR_TARGET/local-secrets.zsh"
