@@ -6,6 +6,13 @@ if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh)"
 fi
 
+# mise — per-directory tool versions + [env] from mise.toml/.tool-versions (this repo's
+# mise.toml, and any other repo that has one). Activation is a prompt hook, so a bare
+# `shellcheck`/`node` resolves to the pinned version after `cd`. Costs a subprocess at startup.
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
+
 # fzf keybindings — rebinds Ctrl-R (fuzzy history), Ctrl-T (fuzzy file insert),
 # Alt-C (fuzzy cd). Sourced from the brew-shipped file instead of `eval "$(fzf --zsh)"`:
 # no subprocess at startup, and completion.zsh (** fuzzy tab-completion) is deliberately

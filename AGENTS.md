@@ -46,6 +46,7 @@ safe to commit since no literal secret ever lands in the file.
 | The tmux status bar / mouse / splits | `tmux/tmux.conf`                   |
 | Ghostty font / keybinds          | `ghostty/config.ghostty` (theme is runtime state: `ghosttytheme` writes an unmanaged `theme` file beside it) |
 | A provisioned tool/app           | `Brewfile`                             |
+| A dev tool / `mise run` task     | `mise.toml`                            |
 | Global `mani` tasks (sync/create-work) | `mani/tasks.yaml`                |
 | The `$HOME` stub or `ZDOTDIR`    | `home/zshenv`                          |
 | A derived value (keychain, `docker context`) | `config/local-secrets.zsh` (tracked — no literal secrets) |
@@ -70,6 +71,13 @@ bin/rollback.sh <ts>        # restore a snapshot (or `latest`)
 bin/uninstall.sh            # = rollback.sh latest
 bin/doctor.sh               # health check: managed-copy drift/stale/missing, tools, znap, startup time. Exit 0 = healthy.
 ```
+
+`mise.toml` pins dev tools (pre-commit, shellcheck, shfmt) and wraps the commands above as
+`mise run <task>` (`mise tasks` lists them): `install`, `update`, `doctor`, `snapshot`,
+`rollback <ts>`, plus `syntax`, `lint`, `check` (syntax + shellcheck + pre-commit), `startup`.
+`bin/*.sh` stay the source of truth. `fmt-check` (shfmt) is outside `check` until the scripts
+are reformatted. `config/60-tools.zsh` runs `mise activate zsh`, so bare pinned tools resolve per
+directory in every repo that has a mise config (adds ~1 subprocess to startup).
 
 Verification helpers:
 

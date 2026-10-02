@@ -1,0 +1,61 @@
+# mise — pinned dev tools + `mise run <task>` wrappers for this repo.
+# One-time: `mise trust && mise install`. bin/*.sh stay the source of truth; tasks only
+# wrap them. Shell activation lives in config/60-tools.zsh.
+
+[tools]
+pre-commit = "4.6.2"
+shellcheck = "0.11.0"
+shfmt = "3.14.1"
+
+[env]
+REPO_ROOT = "{{config_root}}"
+
+[tasks.install]
+description = "Apply repo state (snapshot → brew → znap → copy config → doctor)"
+run = "bin/install.sh"
+
+[tasks.install-nobrew]
+description = "Config copy only (skip Homebrew + Brewfile)"
+run = "bin/install.sh --no-brew"
+
+[tasks.update]
+description = "Upgrade installed packages (brew, uv tools, cargo tools)"
+run = "bin/update.sh"
+
+[tasks.snapshot]
+description = "Snapshot managed config before a risky edit"
+run = "bin/snapshot.sh"
+
+[tasks.rollback]
+description = "Restore a snapshot: mise run rollback <ts|latest> (no arg lists snapshots)"
+run = "bin/rollback.sh"
+
+[tasks.doctor]
+description = "Health check: drift, tools, znap, startup time"
+run = "bin/doctor.sh"
+
+[tasks.syntax]
+description = "zsh -n on config fragments, bash -n on bin scripts (same as the pre-commit hooks)"
+run = '''
+rc=0
+for f in config/*.zsh config/.zshenv config/.zshrc home/zshenv home/zprofile; do zsh -n "$f" || rc=1; done
+for f in bin/*.sh; do bash -n "$f" || rc=1; done
+exit $rc
+'''
+
+[tasks.lint]
+description = "shellcheck on bin scripts (warnings+; SC2088 off: doctor.sh prints a literal ~ on purpose)"
+run = "shellcheck -S warning -e SC2088 bin/*.sh"
+
+[tasks.fmt-check]
+description = "shfmt diff on bin scripts (not in `check`: existing scripts don't match yet; fix with `shfmt -w -i 2 -ci bin/*.sh`)"
+run = "shfmt -d -i 2 -ci bin/*.sh"
+
+[tasks.check]
+description = "syntax + lint + pre-commit on all files"
+depends = ["syntax", "lint"]
+run = "pre-commit run --all-files"
+
+[tasks.startup]
+description = "Interactive shell startup time"
+run = "time zsh -i -c exit"
