@@ -1,0 +1,12 @@
+# Keychain token map: ENV_NAME -> macOS keychain service (account is $USER).
+# Names only, never values. Installed to ~/.config/tokens/map.yaml by bin/install.sh.
+#
+# managed: everything down to the `unmanaged:` line is rewritten from the repo on every
+# install. Do not edit it in ~/.config/tokens/map.yaml.
+managed:
+  HF_TOKEN: hf-access-token
+  BWS_ACCESS_TOKEN: bws-access-token
+  LOCALSTACK_AUTH_TOKEN: localstack-auth-token
+
+# unmanaged: yours. install.sh keeps this section (and anything after it) byte-for-byte.
+# An entry here overrides a managed one with the same ENV_NAME.

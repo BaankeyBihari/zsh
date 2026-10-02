@@ -3,8 +3,8 @@
 # Called automatically by install.sh; also runnable standalone before risky edits.
 #
 # Captures: ~/.zshenv ~/.zshrc ~/.zprofile ~/.config/zsh/ ~/.config/starship.toml
-#           ~/.config/tmux/tmux.conf ~/Library/Application Support/com.mitchellh.ghostty/config.ghostty
-# Writes:   snapshots/<ts>/{home/,config-zsh/,starship.toml,tmux.conf,ghostty.config,manifest.json}
+#           ~/.config/tmux/tmux.conf ~/.config/tokens/map.yaml ~/Library/Application Support/com.mitchellh.ghostty/config.ghostty
+# Writes:   snapshots/<ts>/{home/,config-zsh/,starship.toml,tmux.conf,ghostty.config,tokens-map.yaml,manifest.json}
 #
 # Prints the snapshot timestamp on stdout (so callers can capture it).
 
@@ -44,6 +44,7 @@ capture_file "$HOME/.zprofile" "$DEST/home/.zprofile" "home/.zprofile"
 capture_file "$HOME/.config/starship.toml" "$DEST/starship.toml" "config/starship.toml"
 capture_file "$HOME/.config/tmux/tmux.conf" "$DEST/tmux.conf" "config/tmux.conf"
 capture_file "$HOME/Library/Application Support/com.mitchellh.ghostty/config.ghostty" "$DEST/ghostty.config" "ghostty/config.ghostty"
+capture_file "${XDG_CONFIG_HOME:-$HOME/.config}/tokens/map.yaml" "$DEST/tokens-map.yaml" "config/tokens/map.yaml"
 
 # Capture the whole ~/.config/zsh tree (files + symlinks) if it exists.
 if [[ -d "$HOME/.config/zsh" ]]; then

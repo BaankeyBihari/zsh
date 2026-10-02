@@ -62,6 +62,26 @@ check_copy "$REPO/config/.zshenv" "$ZDOTDIR_TARGET/.zshenv"
 check_copy "$REPO/config/local-secrets.zsh" "$ZDOTDIR_TARGET/local-secrets.zsh"
 check_copy "$REPO/mani/tasks.yaml" "$CONFIG_HOME/mani/tasks.yaml"
 
+# Token map: only the managed section (above `unmanaged:`) must match the repo; the
+# unmanaged section is user-owned and never flagged. Each mapped service must exist in the keychain.
+TOKEN_MAP="$CONFIG_HOME/tokens/map.yaml"
+if [[ ! -f "$TOKEN_MAP" ]]; then
+  bad "${TOKEN_MAP/#$HOME/~} missing — re-run install.sh"
+else
+  if [[ "$(sed '/^unmanaged:/,$d' "$TOKEN_MAP" | shasum -a 256)" == "$(shasum -a 256 <"$REPO/config/tokens-map.yaml")" ]]; then
+    ok "${TOKEN_MAP/#$HOME/~} managed section matches repo"
+  else
+    bad "${TOKEN_MAP/#$HOME/~} managed section drift — re-run install.sh"
+  fi
+  while IFS=' ' read -r name svc; do
+    if security find-generic-password -a "$USER" -s "$svc" >/dev/null 2>&1; then
+      ok "keychain has $svc ($name)"
+    else
+      info "keychain missing $svc ($name) — tokens set $name"
+    fi
+  done < <(sed -nE 's/^[[:space:]]+([A-Za-z_][A-Za-z0-9_]*):[[:space:]]*([^[:space:]#]+).*/\1 \2/p' "$TOKEN_MAP")
+fi
+
 # $HOME must hold no zsh config beyond the managed stubs. A leftover pre-migration
 # ~/.zshrc is ignored while ZDOTDIR is set, but would take effect if ~/.zshenv were lost.
 if [[ -e "$HOME/.zshrc" || -L "$HOME/.zshrc" ]]; then

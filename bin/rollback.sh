@@ -110,6 +110,7 @@ restore "home/.zprofile" "$HOME/.zprofile"
 restore "starship.toml" "$CONFIG_HOME/starship.toml"
 restore "tmux.conf" "$CONFIG_HOME/tmux/tmux.conf"
 restore "ghostty.config" "$GHOSTTY_DIR/config.ghostty"
+restore "tokens-map.yaml" "$CONFIG_HOME/tokens/map.yaml"
 
 if [[ -d "$SNAP/config-zsh" ]] && compgen -G "$SNAP/config-zsh/*" >/dev/null; then
   # Purge the current tree first so the restore is exact — no stale zsh.d/ fragments or

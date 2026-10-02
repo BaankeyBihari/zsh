@@ -183,6 +183,31 @@ copy_file "$REPO/ghostty/config.ghostty" "$GHOSTTY_DIR/config.ghostty"
 mkdir -p "$CONFIG_HOME/mani"
 copy_file "$REPO/mani/tasks.yaml" "$CONFIG_HOME/mani/tasks.yaml"
 
+# Token map: only the managed section (everything above `unmanaged:`) comes from the repo;
+# the user's `unmanaged:` section and anything after it is carried over byte-for-byte.
+sync_token_map() {
+  local src="$REPO/config/tokens-map.yaml" dst="$CONFIG_HOME/tokens/map.yaml" tmp
+  mkdir -p "${dst%/*}"
+  if [[ -e "$dst" ]] && ! grep -q '^unmanaged:' "$dst"; then
+    warn "${dst/#$HOME/~} has no 'unmanaged:' section; leaving it untouched"
+    return 0
+  fi
+  tmp="$(mktemp)"
+  cat "$src" >"$tmp"
+  if [[ -e "$dst" ]]; then
+    sed -n '/^unmanaged:/,$p' "$dst" >>"$tmp"
+  else
+    printf 'unmanaged:\n  # MY_TOKEN: my-keychain-service\n' >>"$tmp"
+  fi
+  if cmp -s "$tmp" "$dst" 2>/dev/null; then
+    rm -f "$tmp"
+  else
+    mv "$tmp" "$dst"
+    log "synced managed section of ${dst/#$HOME/~}"
+  fi
+}
+sync_token_map
+
 # A pre-migration ~/.zshrc is dead code while ZDOTDIR points at ~/.config/zsh, but it
 # would silently take effect again if ~/.zshenv were ever lost. Remove it — the snapshot
 # taken at the top of this run captured it, so rollback.sh can restore it.

@@ -24,6 +24,7 @@ repo only take effect after you re-run `install.sh`.
 home/      → ~/.zshenv, ~/.zprofile        (the only files placed in $HOME)
 config/    → ~/.config/zsh/                 (.zshrc + .zshenv drivers and local-secrets.zsh
              copied to the root; NN-*.zsh fragments copied into ~/.config/zsh/zsh.d/)
+             config/tokens-map.yaml → managed section of ~/.config/tokens/map.yaml
 starship/  → ~/.config/starship.toml
 tmux/      → ~/.config/tmux/tmux.conf      (status bar + mouse/focus/clipboard + split binds; per-agent logo from session-name prefix)
 ghostty/   → ~/Library/Application Support/com.mitchellh.ghostty/config.ghostty
@@ -78,7 +79,7 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
   (manages the `bentopdf-service` Docker container, port 3000; `start` creates
   it on first run with `--restart unless-stopped`, `update` pulls the latest
   image and recreates it), `tokens list|show NAME|set NAME` (view
-  keychain-backed secrets from `config/local-secrets.zsh` masked to their
+  keychain-backed secrets from `~/.config/tokens/map.yaml` masked to their
   last 4 chars, print one in full, or set one via hidden prompt +
   `security add-generic-password`). Plus
   `ghosttytheme` (`config/85-ghosttytheme.zsh`) — Ghostty color-scheme switcher
@@ -126,6 +127,12 @@ pre-commit autoupdate     # rewrite rev: to the latest tags; review, then commit
 
 Copy `config/99-local.zsh.example` to `~/.config/zsh/99-local.zsh`. It's gitignored and loads
 last, so it overrides anything. Never put literal secrets or per-machine paths in tracked files.
+
+Keychain-backed tokens: `~/.config/tokens/map.yaml` maps `ENV_NAME: keychain-service` (names only,
+account is `$USER`), exported at shell start by `config/65-tokens.zsh`. Its `managed:` section is
+rewritten from `config/tokens-map.yaml` on every install; put machine-specific entries under
+`unmanaged:`, which install never touches (and which wins on a name clash). Only that flat YAML
+subset is parsed.
 
 `config/local-secrets.zsh` **is** tracked — it holds only dynamic lookups (macOS keychain,
 `docker context inspect`) that resolve at shell start, never a literal secret value.

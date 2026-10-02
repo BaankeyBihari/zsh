@@ -33,7 +33,11 @@ sits at the `~/.config/zsh/` root — outside `zsh.d/`, so an install never purg
 last-loaded, machine-specific override layer. It sources `local-secrets.zsh` (also installed to
 the root, but tracked in the repo as `config/local-secrets.zsh`), which holds env vars whose
 *values* are derived at shell start (keychain, `docker context inspect`) rather than hardcoded —
-safe to commit since no literal secret ever lands in the file.
+safe to commit since no literal secret ever lands in the file. Keychain-backed tokens are
+the exception to that file: `config/65-tokens.zsh` exports them from `~/.config/tokens/map.yaml`
+(`ENV_NAME: keychain service`, names only). The map has a `managed:` section that `install.sh`
+rewrites from `config/tokens-map.yaml` and an `unmanaged:` section (and anything after it) that
+is the user's and is preserved byte-for-byte; `unmanaged` wins on a name clash.
 
 ## How everything maps to the repo
 
@@ -50,6 +54,8 @@ safe to commit since no literal secret ever lands in the file.
 | Global `mani` tasks (sync/create-work) | `mani/tasks.yaml`                |
 | The `$HOME` stub or `ZDOTDIR`    | `home/zshenv`                          |
 | A derived value (keychain, `docker context`) | `config/local-secrets.zsh` (tracked — no literal secrets) |
+| A keychain-backed env var (provisioned) | `config/tokens-map.yaml` (`managed:` section; installed to `~/.config/tokens/map.yaml`) |
+| A keychain-backed env var (this machine only) | `~/.config/tokens/map.yaml` `unmanaged:` section (never overwritten) |
 | A literal secret / hardcoded machine-specific value | `~/.config/zsh/99-local.zsh` (never committed) |
 
 Config is **copied, not symlinked**: `install.sh` copies the driver/stub files into place and
@@ -136,7 +142,8 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
 - Every managed copy under `~/.config/zsh/` (and the `$HOME`/starship stubs) matches its repo
   source byte-for-byte, and `zsh.d/` holds exactly the current `config/[0-9][0-9]-*.zsh` set.
   `bin/doctor.sh` is authoritative and flags drift, plus any stale (dropped from the repo) or
-  missing fragment.
+  missing fragment. Exception: `~/.config/tokens/map.yaml` — only its `managed:` section must
+  match the repo; the `unmanaged:` section is user-owned and never flagged or overwritten.
 - `snapshots/` is gitignored and is the rollback substrate — it works even if git history is
   unavailable. Each snapshot carries a `manifest.json` (origin paths, sha256, repo HEAD).
 
@@ -147,6 +154,7 @@ hardcoded machine-specific PATH. The `99-local.zsh` escape hatch (see `config/99
 exists precisely so these never enter the repo. `config/local-secrets.zsh` is the one exception:
 it's tracked, but only ever holds lookup commands (keychain, `docker context inspect`), never a
 literal value — if a var can't be expressed as a derived lookup, it belongs in `99-local.zsh` instead.
+`config/tokens-map.yaml` is likewise tracked but holds only env-var and keychain-service *names*.
 
 ## Extras (not repo config)
 

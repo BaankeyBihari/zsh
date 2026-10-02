@@ -289,46 +289,46 @@ bentopdf() {
   esac
 }
 
-# tokens — view or update the keychain-backed secrets exported by
-# config/local-secrets.zsh. `list` shows each var masked to its last 4 chars
-# (or "not set"); `show NAME` prints one token's full value; `set NAME`
-# prompts (hidden input) and writes the keychain entry, then exports it
-# into the current shell.
+# tokens — view or update the keychain-backed secrets listed in
+# ~/.config/tokens/map.yaml (loaded by config/65-tokens.zsh). `list` shows each var
+# masked to its last 4 chars (or "not set") and its map section; `show NAME` prints one
+# token's full value; `set NAME` prompts (hidden input) and writes the keychain entry,
+# then exports it into the current shell.
 #
 #   tokens              # same as `tokens list`
 #   tokens show HF_TOKEN
 #   tokens set HF_TOKEN
 tokens() {
-  local -A svc=(
-    HF_TOKEN               hf-access-token
-    BWS_ACCESS_TOKEN       bws-access-token
-    LOCALSTACK_AUTH_TOKEN  localstack-auth-token
-  )
+  _tokens_map
+  if (( ! $#_TOKENS_MAP )); then
+    print -u2 "tokens: no entries in ${XDG_CONFIG_HOME:-$HOME/.config}/tokens/map.yaml"
+    return 1
+  fi
   case "$1" in
     list|"")
       local name val
-      for name in "${(@ok)svc}"; do
+      for name in "${(@ok)_TOKENS_MAP}"; do
         val="${(P)name}"
         if [[ -n "$val" ]]; then
-          print -r -- "$name: ...${val: -4}"
+          print -r -- "$name: ...${val: -4} (${_TOKENS_SECT[$name]})"
         else
-          print -r -- "$name: not set"
+          print -r -- "$name: not set (${_TOKENS_SECT[$name]})"
         fi
       done
       ;;
     show)
       local name="$2"
-      [[ -n "${svc[$name]}" ]] || { print -u2 "tokens: unknown token '$name' (${(ok)svc})"; return 2 }
+      [[ -n "${_TOKENS_MAP[$name]}" ]] || { print -u2 "tokens: unknown token '$name' (${(ok)_TOKENS_MAP})"; return 2 }
       print -r -- "${(P)name}"
       ;;
     set)
       local name="$2"
-      [[ -n "${svc[$name]}" ]] || { print -u2 "tokens: unknown token '$name' (${(ok)svc})"; return 2 }
+      [[ -n "${_TOKENS_MAP[$name]}" ]] || { print -u2 "tokens: unknown token '$name' (${(ok)_TOKENS_MAP})"; return 2 }
       local value
       read -rs "value?tokens: enter value for $name: "
       print
       [[ -n "$value" ]] || { print -u2 "tokens: empty input, $name left unchanged"; return 1 }
-      security add-generic-password -a "$USER" -s "${svc[$name]}" -w "$value" -U
+      security add-generic-password -a "$USER" -s "${_TOKENS_MAP[$name]}" -w "$value" -U
       export "$name=$value"
       print "tokens: updated $name"
       ;;
