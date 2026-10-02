@@ -130,12 +130,78 @@ toggle-headroom() {
   fi
 }
 
+# _tmux_attach_or_run — shared by claude/codex: resume a matching tmux session
+# for this directory if one exists, else start a new one running $cmd there.
+# Match = same tool (session name prefixed "$tool-") + same target path: git
+# repos match by `git rev-parse --show-toplevel` (any subdirectory finds the
+# session rooted at the repo), everything else by ${PWD:A} (resolved, so a
+# symlinked path like macOS's /tmp -> /private/tmp still matches tmux's own
+# physical pane_current_path). tmux tracks each pane's live cwd itself, so no
+# manual path-tagging is needed.
+# 0 matches -> new session. 1 -> attach. 2+ -> pick via fzf. No tmux installed
+# -> run $cmd directly, same as before this existed. The scan-then-create
+# window is flock'd per tool+dir (zsh/system, no new dependency) so two
+# near-simultaneous launches from the same place resume each other instead of
+# both creating a session -- lock lives in $TMPDIR, not $HOME: it's only
+# needed for this instant, nothing to clean up afterward.
+_tmux_attach_or_run() {
+  local tool="$1" cmd="$2"
+  if ! command -v tmux >/dev/null 2>&1; then
+    eval "$cmd"
+    return
+  fi
+  local target
+  target="$(git rev-parse --show-toplevel 2>/dev/null)" || target="${PWD:A}"
+
+  local -a matches
+  local name lockfd
+  {
+    zmodload zsh/system
+    local lockfile="${TMPDIR:-/tmp}/tmux-attach-$tool-${target//[^A-Za-z0-9_-]/-}.lock"
+    : >> "$lockfile" 2>/dev/null   # zsystem flock needs the file to already exist
+    zsystem flock -f lockfd "$lockfile"
+
+    local sess cwd
+    while IFS=$'\t' read -r sess cwd; do
+      [[ "$sess" == "$tool"-* && "$cwd" == "$target" ]] && matches+=("$sess")
+    done < <(tmux list-panes -a -F '#{session_name}	#{pane_current_path}' 2>/dev/null)
+    matches=(${(u)matches})
+
+    if (( $#matches == 1 )); then
+      name="$matches[1]"
+    elif (( $#matches > 1 )); then
+      name="$(printf '%s\n' "${matches[@]}" | fzf --prompt="$tool session> ")"
+    else
+      local base="${target:t}"
+      base="${base//[^A-Za-z0-9_-]/-}"
+      name="$tool-$base"
+      local i=2
+      while tmux has-session -t "=$name" 2>/dev/null; do
+        name="$tool-$base-$i"
+        (( i++ ))
+      done
+      tmux new-session -d -s "$name" -c "$target" "$cmd"
+    fi
+  } always {
+    exec {lockfd}>&- 2>/dev/null
+  }
+  [[ -n "$name" ]] || return 1
+
+  if [[ -n "$TMUX" ]]; then
+    tmux switch-client -t "$name"
+  else
+    tmux attach -t "$name"
+  fi
+}
+
 # claude — wrapper that routes the CLI through the local Headroom proxy. Unlike
 # toggle-headroom (whole shell, manual), this guards claude specifically: it
 # checks the proxy is ready and sets ANTHROPIC_BASE_URL for the claude process
 # only (OPENAI_BASE_URL is a codex concern, not claude's). Proxy down => print
-# `headroom install status` and abort (never launches claude unrouted). Escape
-# hatch: HEADROOM_OFF=1 claude  runs direct, no check. --version/--help skip it.
+# `headroom install status` and abort (never launches claude unrouted). Once
+# routed, launch goes through _tmux_attach_or_run: resumes the matching tmux
+# session for this directory if one's running, else starts one. Escape hatch:
+# HEADROOM_OFF=1 claude  runs direct, no check, no tmux. --version/--help skip it.
 claude() {
   [[ -n "$HEADROOM_OFF" ]] && { command claude "$@"; return; }
   case "$1" in
@@ -150,11 +216,12 @@ claude() {
     print -ru2 -- "     'headroom install apply --preset persistent-service --providers auto' if not deployed"
     return 1
   fi
-  ANTHROPIC_BASE_URL="http://127.0.0.1:$port" command claude "$@"
+  _tmux_attach_or_run claude "ANTHROPIC_BASE_URL=http://127.0.0.1:$port command claude ${(q)@}"
 }
 
 # codex — same guarded Headroom routing as claude, using the proxy's OpenAI
-# endpoint. HEADROOM_OFF=1 bypasses it; --version/--help stay direct.
+# endpoint, and the same tmux session resume/create via _tmux_attach_or_run.
+# HEADROOM_OFF=1 bypasses it (no proxy, no tmux); --version/--help stay direct.
 codex() {
   [[ -n "$HEADROOM_OFF" ]] && { command codex "$@"; return; }
   case "$1" in
@@ -169,7 +236,7 @@ codex() {
     print -ru2 -- "     'headroom install apply --preset persistent-service --providers auto' if not deployed"
     return 1
   fi
-  OPENAI_BASE_URL="http://127.0.0.1:$port/v1" command codex "$@"
+  _tmux_attach_or_run codex "OPENAI_BASE_URL=http://127.0.0.1:$port/v1 command codex ${(q)@}"
 }
 
 # bentopdf — manage the BentoPDF Docker service (local PDF toolkit at localhost:3000).

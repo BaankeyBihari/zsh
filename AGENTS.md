@@ -103,6 +103,10 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
 - **`claude` and `codex` are guarded Headroom wrappers.** They require the local proxy to
   pass `/readyz`, then set the provider-specific base URL for that process. Set
   `HEADROOM_OFF=1` for an intentional direct launch; help and version calls stay direct.
+  Routed launches run inside tmux via `_tmux_attach_or_run`: it resumes the session
+  already running for the current directory (git repos match by
+  `git rev-parse --show-toplevel`, so any subdirectory finds it), prompts with `fzf`
+  when several match, or starts a new session when none do.
 - **Some tool config lives outside this repo's substrate**: delta is wired as git pager via
   `git config --global` (`~/.gitconfig`) — not snapshot-protected; undo with
   `git config --global --unset`.

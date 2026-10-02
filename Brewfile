@@ -5,6 +5,7 @@
 brew "zsh"
 brew "git"
 brew "starship"
+brew "tmux"        # backs `claude`/`codex` sessions in config/80-functions.zsh
 
 # Rust toolchain
 brew "rust"
