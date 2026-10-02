@@ -402,3 +402,66 @@ logit() {
   print -u2 "→ saved: ${file/#$HOME/~}"
   return $rc
 }
+
+# cheat — keys/aliases/functions quick reference. Static text: update it when the
+# bindings in tmux/tmux.conf, ghostty/config.ghostty or 70-aliases.zsh change.
+#   cheat            # everything
+#   cheat keys|aliases|funcs
+cheat() {
+  local sec="${1:-all}"
+  case "$sec" in all|keys|aliases|funcs) ;; *) print -u2 "usage: cheat [keys|aliases|funcs]"; return 2 ;; esac
+
+  if [[ $sec == (all|keys) ]]; then
+    command cat <<'EOS'
+GHOSTTY (inside tmux; split/pane chords just send the tmux prefix C-b + key)
+  cmd+d then s        split right            (tmux prefix |)
+  cmd+d then v        split down             (tmux prefix -)
+  cmd+alt+arrows      move between panes     (tmux prefix + arrow)
+  cmd+shift+f         zoom/unzoom pane       (tmux prefix z)
+  cmd+shift+e         spread panes evenly    (tmux prefix E)
+  cmd+t / cmd+w       new tab / close surface
+  cmd+shift+left/right  previous / next Ghostty tab
+  cmd+`               quick terminal (global)
+
+TMUX (prefix = C-b; new panes open in the current directory)
+  prefix |  /  -      split right / down
+  prefix arrows       select pane
+  prefix z            zoom pane          prefix E  spread evenly
+  prefix c            new window         prefix n / p  next / previous window
+  prefix d            detach (claude/codex/agy sessions resume on relaunch)
+  prefix [            copy mode (q quits)
+  mouse               click pane/window, drag border to resize, wheel scrolls,
+                      drag-select copies (hold Option to bypass tmux)
+
+SHELL (fzf)
+  Ctrl-R              fuzzy history      Ctrl-T  fuzzy file insert
+  Alt-C               fuzzy cd
+
+EOS
+  fi
+  if [[ $sec == (all|aliases) ]]; then
+    command cat <<'EOS'
+ALIASES
+  ls ll la l tree     eza (icons; ll adds git status)
+  cat                 bat
+  c                   clear
+  j                   zoxide jump (z <dir>, zi = interactive)
+
+EOS
+  fi
+  if [[ $sec == (all|funcs) ]]; then
+    command cat <<'EOS'
+FUNCTIONS
+  cheat [keys|aliases|funcs]   this help
+  manigen <url…>      clone repos flat, refresh mani.yaml (no args = rescan)
+  rename-tab <name>   set terminal tab title
+  benchmark <cmd…>    hyperfine with warmup
+  logit [-p] [-n slug] <cmd…>  capture output to ~/.cache/captures; logit -l = newest
+  toggle-headroom     route Anthropic/OpenAI via the Headroom proxy; again = unset
+  claude codex agy    tmux-backed, resumable (HEADROOM_OFF=1 = direct)
+  tokens [list|show|set <name>]  keychain-backed API tokens
+  bentopdf start|stop|update|status  PDF tool container
+  ghosttytheme        pick Ghostty theme
+EOS
+  fi
+}

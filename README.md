@@ -55,7 +55,8 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
   (incompatible CLIs); use `fd` directly.
 - **git**: delta as pager (syntax-highlighted diffs; configured in `~/.gitconfig`, outside
   this repo's snapshots).
-- **Functions** (`config/80-functions.zsh`): `manigen` (clone repo URLs flat into
+- **Functions** (`config/80-functions.zsh`): `cheat` (quick reference for tmux/Ghostty
+  navigation + split keys, fzf keys, aliases, functions; `cheat keys|aliases|funcs`), `manigen` (clone repo URLs flat into
   the cwd, then generate/refresh `mani.yaml` from every git dir found there —
   run with no args to just rescan after a manual clone/init; skips `Work/`),
   `rename-tab`, `benchmark` (hyperfine with default warmup), `logit` (tee a command's
