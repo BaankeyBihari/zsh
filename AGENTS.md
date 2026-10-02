@@ -106,7 +106,8 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
   Routed launches run inside tmux via `_tmux_attach_or_run`: it resumes the session
   already running for the current directory (git repos match by
   `git rev-parse --show-toplevel`, so any subdirectory finds it), prompts with `fzf`
-  when several match, or starts a new session when none do.
+  when several match, or starts a new session when none do. `agy` (Antigravity CLI) gets
+  the same tmux backing but no Headroom routing/proxy check; `-p`/`--print` and subcommands stay direct.
 - **Some tool config lives outside this repo's substrate**: delta is wired as git pager via
   `git config --global` (`~/.gitconfig`) — not snapshot-protected; undo with
   `git config --global --unset`.

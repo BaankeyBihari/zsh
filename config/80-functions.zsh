@@ -239,6 +239,18 @@ codex() {
   _tmux_attach_or_run codex "OPENAI_BASE_URL=http://127.0.0.1:$port/v1 command codex ${(q)@}"
 }
 
+# agy — Antigravity CLI, tmux session resume/create via _tmux_attach_or_run. No
+# Headroom routing (no known base-URL knob for agy), so no proxy check.
+# HEADROOM_OFF=1 bypasses tmux; --version/--help and non-interactive -p/--print
+# (and its --prompt alias) and subcommands stay direct.
+agy() {
+  [[ -n "$HEADROOM_OFF" ]] && { command agy "$@"; return; }
+  case "$1" in
+    -v|--version|-h|--help|-p|--print|--prompt|agent|agents|changelog|help) command agy "$@"; return ;;
+  esac
+  _tmux_attach_or_run agy "command agy ${(q)@}"
+}
+
 # bentopdf — manage the BentoPDF Docker service (local PDF toolkit at localhost:3000).
 # Container run with --restart unless-stopped, so once started it survives
 # reboots/Docker restarts on its own; these subcommands are for manual control.

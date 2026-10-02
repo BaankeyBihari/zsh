@@ -68,7 +68,8 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
   session: resumes the matching session for the current directory — git repos
   match by `git rev-parse --show-toplevel`, so any subdirectory finds it —
   prompts via `fzf` if several match, or starts a new one if none do;
-  `HEADROOM_OFF=1`/`--version`/`--help` skip tmux too), `bentopdf start|stop|update|status`
+  `HEADROOM_OFF=1`/`--version`/`--help` skip tmux too), `agy` (Antigravity CLI: same tmux
+  resume/create, but no Headroom routing; `-p`/`--print`/subcommands stay direct), `bentopdf start|stop|update|status`
   (manages the `bentopdf-service` Docker container, port 3000; `start` creates
   it on first run with `--restart unless-stopped`, `update` pulls the latest
   image and recreates it), `tokens list|show NAME|set NAME` (view
