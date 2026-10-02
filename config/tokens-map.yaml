@@ -9,7 +9,9 @@ managed:
   HF_TOKEN:
     service: hf-access-token
     validator: curl -fsS --max-time 10 -o /dev/null -H "Authorization: Bearer $HF_TOKEN" https://huggingface.co/api/whoami-v2
-  BWS_ACCESS_TOKEN: bws-access-token
+  BWS_ACCESS_TOKEN:
+    service: bws-access-token
+    validator: bws project list --output none
   LOCALSTACK_AUTH_TOKEN: localstack-auth-token
 
 # unmanaged: yours. install.sh keeps this section (and anything after it) byte-for-byte.
