@@ -106,7 +106,7 @@ tools and `[env]` load per directory in any repo with a mise config.
 ## Pre-commit hooks
 
 `.pre-commit-config.yaml` guards the repo: `zsh -n` on the config fragments, `bash -n` on
-`bin/*.sh`, plus whitespace/EOF/merge-conflict checks. Activate once per clone:
+`bin/*.sh`, shellcheck and `shfmt -d` on `bin/*.sh`, plus whitespace/EOF/merge-conflict checks. Activate once per clone:
 
 ```sh
 pre-commit install        # wires .git/hooks/pre-commit; hooks then run on every commit

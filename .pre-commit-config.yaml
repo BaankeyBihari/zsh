@@ -19,6 +19,19 @@ repos:
         language: system
         files: '^bin/.*\.sh$'
 
+      # Same flags as `mise run lint` / `mise run fmt-check`; tools are pinned in mise.toml.
+      - id: shellcheck
+        name: shellcheck (bin scripts)
+        entry: shellcheck -S warning -e SC2088
+        language: system
+        files: '^bin/.*\.sh$'
+
+      - id: shfmt
+        name: shfmt (bin scripts)
+        entry: shfmt -d -i 2 -ci
+        language: system
+        files: '^bin/.*\.sh$'
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
