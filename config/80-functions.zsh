@@ -432,10 +432,10 @@ logit() {
 # cheat — keys/aliases/functions quick reference. Static text: update it when the
 # bindings in tmux/tmux.conf, ghostty/config.ghostty or 70-aliases.zsh change.
 #   cheat            # everything
-#   cheat keys|aliases|funcs
+#   cheat keys|aliases|funcs|work
 cheat() {
   local sec="${1:-all}"
-  case "$sec" in all|keys|aliases|funcs) ;; *) print -u2 "usage: cheat [keys|aliases|funcs]"; return 2 ;; esac
+  case "$sec" in all|keys|aliases|funcs|work) ;; *) print -u2 "usage: cheat [keys|aliases|funcs|work]"; return 2 ;; esac
 
   if [[ $sec == (all|keys) ]]; then
     command cat <<'EOS'
@@ -478,7 +478,7 @@ EOS
   if [[ $sec == (all|funcs) ]]; then
     command cat <<'EOS'
 FUNCTIONS
-  cheat [keys|aliases|funcs]   this help
+  cheat [keys|aliases|funcs|work]   this help
   manigen <url…>      clone repos flat, refresh mani.yaml (no args = rescan)
   rename-tab <name>   set terminal tab title
   benchmark <cmd…>    hyperfine with warmup
@@ -488,6 +488,24 @@ FUNCTIONS
   tokens [list|show|set <name>|validate [name]]  keychain-backed API tokens
   bentopdf start|stop|update|status  PDF tool container
   ghosttytheme        pick Ghostty theme
+EOS
+  fi
+  if [[ $sec == (all|work) ]]; then
+    command cat <<'EOS'
+
+WORKFLOW (mani acts across repos, gita shows status; tasks in ~/.config/mani/tasks.yaml)
+  Run mani from the folder holding mani.yaml (see manigen); --all = every project.
+  1 morning     mani run sync --all                     pull default branch everywhere
+                gita ll reference                       base repos: clean / up to date?
+  2 new ticket  mani run create-work slug=T-1 --all     Work/Work-T-1/<repo> worktrees,
+                                                        upstream set, gita group "T-1"
+  3 dashboard   gita ll T-1                             * modified  + staged  ahead/behind
+  4 update      mani run rebase-work slug=T-1 --all     rebase on default (halts on conflict)
+                mani run push-work slug=T-1 --all       push every worktree
+                mani run pull-work slug=T-1 --all       pull --ff-only
+  5 teardown    mani run clean-work slug=T-1 --all      refuses dirty / unpushed repos
+                mani run clean-work-forced slug=T-1 --all   DESTROYS unpushed work
+  gita ll         all repos          gita ll reference   base repos only
 EOS
   fi
 }
