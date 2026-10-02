@@ -105,9 +105,11 @@ if [[ $DO_BREW -eq 1 ]]; then
   # virtualenv: standalone venv creator.
   # headroom-ai[all]: local Anthropic/OpenAI proxy that compresses context, with
   #   all optional extras (ships the `headroom` command; see toggle-headroom).
+  # browser-use: browser automation CLI for AI agents.
+  # jarvislabs: Jarvis Labs GPU cloud CLI (ships the `jl` command).
   # `uv tool install` is idempotent.
   if command -v uv >/dev/null 2>&1; then
-    for entry in "gita:gita" "nox:nox" "virtualenv:virtualenv" "headroom-ai[all]:headroom"; do
+    for entry in "gita:gita" "nox:nox" "virtualenv:virtualenv" "headroom-ai[all]:headroom" "browser-use:browser-use" "jarvislabs:jl"; do
       pkg="${entry%%:*}"
       cli="${entry##*:}"
       if command -v "$cli" >/dev/null 2>&1; then
