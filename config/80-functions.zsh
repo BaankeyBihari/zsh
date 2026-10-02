@@ -293,11 +293,14 @@ bentopdf() {
 # ~/.config/tokens/map.yaml (loaded by config/65-tokens.zsh). `list` shows each var
 # masked to its last 4 chars (or "not set") and its map section; `show NAME` prints one
 # token's full value; `set NAME` prompts (hidden input) and writes the keychain entry,
-# then exports it into the current shell.
+# then exports it into the current shell; `validate [NAME]` runs each token's `validator`
+# from the map (a shell command or script, exit 0 = good; output hidden) and warns for
+# tokens that have none.
 #
 #   tokens              # same as `tokens list`
 #   tokens show HF_TOKEN
 #   tokens set HF_TOKEN
+#   tokens validate [HF_TOKEN]
 tokens() {
   _tokens_map
   if (( ! $#_TOKENS_MAP )); then
@@ -332,8 +335,31 @@ tokens() {
       export "$name=$value"
       print "tokens: updated $name"
       ;;
+    validate)
+      local -a names
+      local name val vrc rc=0
+      if [[ -n "$2" ]]; then
+        [[ -n "${_TOKENS_MAP[$2]}" ]] || { print -u2 "tokens: unknown token '$2' (${(ok)_TOKENS_MAP})"; return 2 }
+        names=("$2")
+      else
+        names=("${(@ok)_TOKENS_MAP}")
+      fi
+      for name in "${names[@]}"; do
+        val="${(P)name}"
+        if [[ -z "$val" ]]; then
+          print -r -- "$name: not set"; rc=1
+        elif [[ -z "${_TOKENS_VAL[$name]}" ]]; then
+          print -u2 "$name: no validator configured"
+        elif env "$name=$val" sh -c "${_TOKENS_VAL[$name]}" >/dev/null 2>&1; then
+          print -r -- "$name: ok"
+        else
+          vrc=$?; print -r -- "$name: FAILED (exit $vrc)"; rc=1
+        fi
+      done
+      return $rc
+      ;;
     *)
-      print -u2 "usage: tokens [list|show <name>|set <name>]"
+      print -u2 "usage: tokens [list|show <name>|set <name>|validate [name]]"
       return 2
       ;;
   esac

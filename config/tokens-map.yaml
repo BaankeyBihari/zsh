@@ -3,8 +3,12 @@
 #
 # managed: everything down to the `unmanaged:` line is rewritten from the repo on every
 # install. Do not edit it in ~/.config/tokens/map.yaml.
+# Entry forms (2-space indent): `NAME: service`, or nested `service:` + optional `validator:`
+# (shell command or script, exit 0 = good; run by `tokens validate`, never at shell start).
 managed:
-  HF_TOKEN: hf-access-token
+  HF_TOKEN:
+    service: hf-access-token
+    validator: curl -fsS --max-time 10 -o /dev/null -H "Authorization: Bearer $HF_TOKEN" https://huggingface.co/api/whoami-v2
   BWS_ACCESS_TOKEN: bws-access-token
   LOCALSTACK_AUTH_TOKEN: localstack-auth-token
 

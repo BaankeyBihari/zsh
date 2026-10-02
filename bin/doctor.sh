@@ -79,7 +79,10 @@ else
     else
       info "keychain missing $svc ($name) — tokens set $name"
     fi
-  done < <(sed -nE 's/^[[:space:]]+([A-Za-z_][A-Za-z0-9_]*):[[:space:]]*([^[:space:]#]+).*/\1 \2/p' "$TOKEN_MAP")
+  done < <(awk '
+    /^  [A-Za-z_][A-Za-z0-9_]*:/ { name = $1; sub(/:$/, "", name); if ($2 != "" && $2 !~ /^#/) print name, $2; next }
+    name != "" && /^    +service:/ { print name, $2 }
+  ' "$TOKEN_MAP")
 fi
 
 # $HOME must hold no zsh config beyond the managed stubs. A leftover pre-migration

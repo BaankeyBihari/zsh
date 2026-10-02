@@ -37,7 +37,8 @@ safe to commit since no literal secret ever lands in the file. Keychain-backed t
 the exception to that file: `config/65-tokens.zsh` exports them from `~/.config/tokens/map.yaml`
 (`ENV_NAME: keychain service`, names only). The map has a `managed:` section that `install.sh`
 rewrites from `config/tokens-map.yaml` and an `unmanaged:` section (and anything after it) that
-is the user's and is preserved byte-for-byte; `unmanaged` wins on a name clash.
+is the user's and is preserved byte-for-byte; `unmanaged` wins on a name clash. An entry may carry
+a `validator:` (shell command/script) that `tokens validate` runs; it never runs at shell start.
 
 ## How everything maps to the repo
 

@@ -78,10 +78,11 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
   resume/create, but no Headroom routing; `-p`/`--print`/subcommands stay direct), `bentopdf start|stop|update|status`
   (manages the `bentopdf-service` Docker container, port 3000; `start` creates
   it on first run with `--restart unless-stopped`, `update` pulls the latest
-  image and recreates it), `tokens list|show NAME|set NAME` (view
+  image and recreates it), `tokens list|show NAME|set NAME|validate [NAME]` (view
   keychain-backed secrets from `~/.config/tokens/map.yaml` masked to their
   last 4 chars, print one in full, or set one via hidden prompt +
-  `security add-generic-password`). Plus
+  `security add-generic-password`; `validate` runs each token's `validator` from the map and warns
+  for tokens without one). Plus
   `ghosttytheme` (`config/85-ghosttytheme.zsh`) — Ghostty color-scheme switcher
   with fzf picker (writes an unmanaged `theme` file that `config.ghostty` includes).
 - **Navigation**: zoxide (`z`/`zi`, `j` alias).
@@ -131,8 +132,10 @@ last, so it overrides anything. Never put literal secrets or per-machine paths i
 Keychain-backed tokens: `~/.config/tokens/map.yaml` maps `ENV_NAME: keychain-service` (names only,
 account is `$USER`), exported at shell start by `config/65-tokens.zsh`. Its `managed:` section is
 rewritten from `config/tokens-map.yaml` on every install; put machine-specific entries under
-`unmanaged:`, which install never touches (and which wins on a name clash). Only that flat YAML
-subset is parsed.
+`unmanaged:`, which install never touches (and which wins on a name clash). Entries are 2-space
+indented: `NAME: service`, or nested `service:` plus an optional `validator:` (any shell command or
+script, exit 0 = good, output hidden; the token is in its environment under its own name). Validators
+run only on `tokens validate [NAME]`, never at shell start. Only that flat YAML subset is parsed.
 
 `config/local-exports.zsh` **is** tracked — it holds only dynamic lookups (macOS keychain,
 `docker context inspect`) that resolve at shell start, never a literal secret value.
