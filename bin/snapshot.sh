@@ -31,7 +31,7 @@ capture_file() {
     local checksum=""
     [[ -f "$src" && ! -L "$src" ]] && checksum="$(sha "$src")"
     manifest_entries+=("$(printf '{"name":"%s","origin":"%s","stored":"%s","is_symlink":%s,"symlink_target":"%s","sha256":"%s"}' \
-      "$name" "$src" "${dst#$DEST/}" \
+      "$name" "$src" "${dst#"$DEST"/}" \
       "$([[ -L "$src" ]] && echo true || echo false)" \
       "$([[ -L "$src" ]] && readlink "$src" || echo "")" \
       "$checksum")")
