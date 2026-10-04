@@ -49,7 +49,7 @@ a `validator:` (shell command/script) that `tokens validate` runs; it never runs
 | An alias / function              | `config/70-aliases.zsh` / `80-functions.zsh` |
 | The prompt                       | `starship/starship.toml`               |
 | The tmux status bar / mouse / splits | `tmux/tmux.conf`                   |
-| Ghostty font / keybinds          | `ghostty/config.ghostty` (theme is runtime state: `ghosttytheme` writes an unmanaged `theme` file beside it) |
+| Ghostty font / keybinds          | `ghostty/config.ghostty` (pick a theme with `ghostty +list-themes`) |
 | A provisioned tool/app           | `Brewfile`                             |
 | A dev tool / `mise run` task     | `mise.toml`                            |
 | Global `mani` tasks (sync, create/pull/push/rebase/clean-work) | `mani/tasks.yaml`                |
@@ -124,7 +124,10 @@ ZDOTDIR=~/.config/zsh zsh -i -c 'alias ll; command -v starship'   # smoke-test a
   `git rev-parse --show-toplevel`, so any subdirectory finds it), prompts with `fzf`
   when several match, or starts a new session when none do. Already inside tmux (`$TMUX`) it
   runs the agent in the current pane — pane splits are tmux's (`prefix`+`|`/`-`), triggered from
-  Ghostty's `cmd+d>s`/`cmd+d>v` chords (`text:\x02…` shims in `ghostty/config.ghostty`). `agy` (Antigravity CLI) gets
+  Ghostty's `cmd+d>s`/`cmd+d>v` chords (`text:\x02…` shims in `ghostty/config.ghostty`).
+  `CLAUDE_TEAMS=1 claude` opts in to agent teams (sets `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` for that
+  process only — experimental, multiplies token cost); teammates split into panes of the same tmux
+  session and inherit the Headroom route. `tmux/tmux.conf` adds pane labels and layout binds for them. `agy` (Antigravity CLI) gets
   the same tmux backing but no Headroom routing/proxy check; `-p`/`--print` and subcommands stay direct.
 - **Some tool config lives outside this repo's substrate**: delta is wired as git pager via
   `git config --global` (`~/.gitconfig`) — not snapshot-protected; undo with

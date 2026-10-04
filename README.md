@@ -26,7 +26,7 @@ config/    → ~/.config/zsh/                 (.zshrc + .zshenv drivers and loca
              copied to the root; NN-*.zsh fragments copied into ~/.config/zsh/zsh.d/)
              config/tokens-map.yaml → managed section of ~/.config/tokens/map.yaml
 starship/  → ~/.config/starship.toml
-tmux/      → ~/.config/tmux/tmux.conf      (status bar + mouse/focus/clipboard + split binds; per-agent logo from session-name prefix)
+tmux/      → ~/.config/tmux/tmux.conf      (status bar + mouse/focus/clipboard + split/layout/agent-team pane binds; per-agent logo from session-name prefix)
 ghostty/   → ~/Library/Application Support/com.mitchellh.ghostty/config.ghostty
              (font, tabs, quick terminal; cmd+d/cmd+shift+e/f/cmd+alt+arrows send tmux split binds)
 mani/      → ~/.config/mani/tasks.yaml     (global sync/create-work/pull-work/push-work/rebase-work/clean-work tasks; worktrees live in Work/Work-<workspace>-<slug>/<repo> and are grouped in Gita as <workspace>-<slug>; imported by
@@ -74,7 +74,7 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
   match by `git rev-parse --show-toplevel`, so any subdirectory finds it —
   prompts via `fzf` if several match, or starts a new one if none do; already
   inside tmux it runs in the current pane instead, so split a pane and start an agent there;
-  `HEADROOM_OFF=1`/`--version`/`--help` skip tmux too), `agy` (Antigravity CLI: same tmux
+  `HEADROOM_OFF=1`/`--version`/`--help` skip tmux too; `CLAUDE_TEAMS=1 claude` opts in to experimental agent teams, teammates open as tmux panes), `agy` (Antigravity CLI: same tmux
   resume/create, but no Headroom routing; `-p`/`--print`/subcommands stay direct), `bentopdf start|stop|update|status`
   (manages the `bentopdf-service` Docker container, port 3000; `start` creates
   it on first run with `--restart unless-stopped`, `update` pulls the latest
@@ -82,9 +82,7 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
   keychain-backed secrets from `~/.config/tokens/map.yaml` masked to their
   last 4 chars, print one in full, or set one via hidden prompt +
   `security add-generic-password`; `validate` runs each token's `validator` from the map and warns
-  for tokens without one). Plus
-  `ghosttytheme` (`config/85-ghosttytheme.zsh`) — Ghostty color-scheme switcher
-  with fzf picker (writes an unmanaged `theme` file that `config.ghostty` includes).
+  for tokens without one).
 - **Navigation**: zoxide (`z`/`zi`, `j` alias).
 
 ## Everyday commands

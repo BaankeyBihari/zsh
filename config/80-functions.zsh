@@ -200,12 +200,16 @@ _tmux_attach_or_run() {
 # routed, launch goes through _tmux_attach_or_run: resumes the matching tmux
 # session for this directory if one's running, else starts one. Escape hatch:
 # HEADROOM_OFF=1 claude  runs direct, no check, no tmux. --version/--help skip it.
+# CLAUDE_TEAMS=1 claude  opt-in agent teams (experimental, multiplies token cost):
+# sets CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS for that process; teammates open as
+# tmux panes (teammateMode auto splits when inside tmux) and inherit the Headroom route.
 claude() {
   [[ -n "$HEADROOM_OFF" ]] && { command claude "$@"; return; }
   case "$1" in
     -v|--version|-h|--help) command claude "$@"; return ;;
   esac
   local port="${HEADROOM_PORT:-8787}"
+  [[ $port == <-> ]] || { print -ru2 -- "HEADROOM_PORT must be numeric: $port"; return 1; }
   if ! curl -fsS --connect-timeout 1 --max-time 2 "http://127.0.0.1:$port/readyz" >/dev/null 2>&1; then
     print -ru2 -- "headroom proxy down (http://127.0.0.1:$port/readyz) — claude launch aborted"
     print -ru2 -- "--- headroom install status ---"
@@ -214,7 +218,9 @@ claude() {
     print -ru2 -- "     'headroom install apply --preset persistent-service --providers auto' if not deployed"
     return 1
   fi
-  _tmux_attach_or_run claude "ANTHROPIC_BASE_URL=http://127.0.0.1:$port command claude ${(q)@}"
+  local teams=""
+  [[ -n "$CLAUDE_TEAMS" ]] && teams="CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 "
+  _tmux_attach_or_run claude "${teams}ANTHROPIC_BASE_URL=http://127.0.0.1:$port command claude ${(q)@}"
 }
 
 # codex — same guarded Headroom routing as claude, using the proxy's OpenAI
@@ -226,6 +232,7 @@ codex() {
     -v|--version|-h|--help) command codex "$@"; return ;;
   esac
   local port="${HEADROOM_PORT:-8787}"
+  [[ $port == <-> ]] || { print -ru2 -- "HEADROOM_PORT must be numeric: $port"; return 1; }
   if ! curl -fsS --connect-timeout 1 --max-time 2 "http://127.0.0.1:$port/readyz" >/dev/null 2>&1; then
     print -ru2 -- "headroom proxy down (http://127.0.0.1:$port/readyz) — codex launch aborted"
     print -ru2 -- "--- headroom install status ---"
@@ -405,7 +412,7 @@ logit() {
   find "$dir" -name '*.md' -type f -mtime +$keep_days -delete 2>/dev/null
 
   local file="$dir/$(date +%F)-$slug.md"
-  [[ -e "$file" ]] && file="$dir/$(date +%F)-$slug-$(date +%H%M%S).md"
+  [[ -e "$file" ]] && file="$dir/$(date +%F)-$slug-$(date +%H%M%S)-$$.md"
 
   # Four-backtick fence so captured output containing ``` can't break the block.
   {
@@ -456,6 +463,9 @@ TMUX (prefix = C-b; new panes open in the current directory)
   prefix c            new window         prefix n / p  next / previous window
   prefix d            detach (claude/codex/agy sessions resume on relaunch)
   prefix [            copy mode (q quits)
+  prefix t / v / h    layout: tiled / lead left + agents right / lead top + agents below
+  prefix S            toggle synchronize-panes (type into all panes)
+  alt+arrows          select pane (no prefix)   ctrl+alt+arrows  resize pane
   mouse               click pane/window, drag border to resize, wheel scrolls,
                       drag-select copies (hold Option to bypass tmux)
 
@@ -485,9 +495,9 @@ FUNCTIONS
   logit [-p] [-n slug] <cmd…>  capture output to ~/.cache/captures; logit -l = newest
   toggle-headroom     route Anthropic/OpenAI via the Headroom proxy; again = unset
   claude codex agy    tmux-backed, resumable (HEADROOM_OFF=1 = direct)
+  CLAUDE_TEAMS=1 claude  opt-in agent teams; teammates split into tmux panes
   tokens [list|show|set <name>|validate [name]]  keychain-backed API tokens
   bentopdf start|stop|update|status  PDF tool container
-  ghosttytheme        pick Ghostty theme
 EOS
   fi
   if [[ $sec == (all|work) ]]; then
