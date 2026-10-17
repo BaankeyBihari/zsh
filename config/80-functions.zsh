@@ -38,6 +38,29 @@ manigen() {
   print "manigen: wrote mani.yaml ($count projects)"
 }
 
+# work-new — pick which repos get a worktree, then run create-work on just those.
+# Same repo scan as manigen (git dirs in cwd, not Work/); multi-select with Tab.
+#
+#   work-new T-1      # fzf picker -> mani run create-work slug=T-1 --projects a,b
+work-new() {
+  local slug="${1:?usage: work-new <slug>}"
+  [[ -f mani.yaml ]] || { print -u2 "work-new: no mani.yaml here (run manigen)"; return 1; }
+  command -v fzf >/dev/null || { print -u2 "work-new: fzf not found"; return 1; }
+
+  local dir
+  local -a repos picked
+  for dir in */; do
+    dir="${dir%/}"
+    [[ "$dir" == "Work" ]] && continue
+    [[ -d "$dir/.git" ]] && repos+=("$dir")
+  done
+  picked=("${(@f)$(printf '%s\n' "${repos[@]}" | fzf -m --prompt='worktree repos> ')}")
+  picked=("${(@)picked:#}")
+  (( ${#picked} )) || { print "work-new: nothing selected"; return 1; }
+
+  mani run create-work slug="$slug" --projects "${(j:,:)picked}"
+}
+
 # rename-tab — set a sticky title on the current terminal tab/window.
 # Uses OSC 1 (tab/icon) + OSC 2 (window) escape codes, which iTerm2, Terminal.app,
 # and xterm-compatible emulators honour. printf (not print -P) so the title is
@@ -490,6 +513,7 @@ EOS
 FUNCTIONS
   cheat [keys|aliases|funcs|work]   this help
   manigen <url…>      clone repos flat, refresh mani.yaml (no args = rescan)
+  work-new <slug>     fzf-pick repos (Tab = multi), create-work worktrees for just those
   rename-tab <name>   set terminal tab title
   benchmark <cmd…>    hyperfine with warmup
   logit [-p] [-n slug] <cmd…>  capture output to ~/.cache/captures; logit -l = newest
@@ -510,6 +534,7 @@ WORKFLOW (mani acts across repos, gita shows status; tasks in ~/.config/mani/tas
                 gita ll <workspace>-reference          base repos: clean / up to date?
   2 new ticket  mani run create-work slug=T-1 --all     Work/Work-<workspace>-T-1/<repo>,
                                                         upstream set, gita group <workspace>-T-1
+                work-new T-1                            same, but fzf-pick which repos
   3 dashboard   gita ll <workspace>-T-1                 * modified  + staged  ahead/behind
   4 update      mani run rebase-work slug=T-1 --all     rebase on default (halts on conflict)
                 mani run push-work slug=T-1 --all       push every worktree
