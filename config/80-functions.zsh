@@ -42,19 +42,27 @@ manigen() {
 # Same repo scan as manigen (git dirs in cwd, not Work/); multi-select with Tab.
 #
 #   work-new T-1      # fzf picker -> mani run create-work slug=T-1 --projects a,b
+#
+# Re-run with an existing slug to add more repos: ones already checked out under
+# Work/Work-<workspace>-<slug>/ are left out of the picker (fzf can't grey rows out)
+# and listed in its header instead.
 work-new() {
   local slug="${1:?usage: work-new <slug>}"
   [[ -f mani.yaml ]] || { print -u2 "work-new: no mani.yaml here (run manigen)"; return 1; }
   command -v fzf >/dev/null || { print -u2 "work-new: fzf not found"; return 1; }
 
   local dir
-  local -a repos picked
+  local -a repos have picked
+  local nl=$'\n'
   for dir in */; do
     dir="${dir%/}"
     [[ "$dir" == "Work" ]] && continue
-    [[ -d "$dir/.git" ]] && repos+=("$dir")
+    [[ -d "$dir/.git" ]] || continue
+    if [[ -d "Work/Work-${PWD:t}-${slug}/$dir" ]]; then have+=("$dir"); else repos+=("$dir"); fi
   done
-  picked=("${(@f)$(printf '%s\n' "${repos[@]}" | fzf -m --prompt='worktree repos> ')}")
+  (( ${#repos} )) || { print "work-new: every repo already has a '$slug' worktree"; return 0; }
+  picked=("${(@f)$(printf '%s\n' "${repos[@]}" | fzf -m --prompt='worktree repos> ' \
+    --header="Tab = select, Enter = confirm${have:+${nl}already in $slug: ${(j:, :)have}}")}")
   picked=("${(@)picked:#}")
   (( ${#picked} )) || { print "work-new: nothing selected"; return 1; }
 
@@ -513,7 +521,8 @@ EOS
 FUNCTIONS
   cheat [keys|aliases|funcs|work]   this help
   manigen <url…>      clone repos flat, refresh mani.yaml (no args = rescan)
-  work-new <slug>     fzf-pick repos (Tab = multi), create-work worktrees for just those
+  work-new <slug>     fzf-pick repos (Tab = multi), create-work worktrees for just those;
+                      re-run on an existing slug to add repos (already-added ones hidden)
   rename-tab <name>   set terminal tab title
   benchmark <cmd…>    hyperfine with warmup
   logit [-p] [-n slug] <cmd…>  capture output to ~/.cache/captures; logit -l = newest

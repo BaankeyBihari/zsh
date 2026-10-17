@@ -60,7 +60,7 @@ order, then `99-local.zsh`. To add config, drop a new numbered fragment in `conf
   navigation + split keys, fzf keys, aliases, functions, the mani/gita workflow; `cheat keys|aliases|funcs|work`), `manigen` (clone repo URLs flat into
   the cwd, then generate/refresh `mani.yaml` from every git dir found there —
   run with no args to just rescan after a manual clone/init; skips `Work/`),
-  `work-new <slug>` (fzf multi-select repos, then `mani run create-work --projects` on just those),
+  `work-new <slug>` (fzf multi-select repos, then `mani run create-work --projects` on just those; re-run on an existing slug to add repos, already-added ones are hidden),
   `rename-tab`, `benchmark` (hyperfine with default warmup), `logit` (tee a command's
   output to `~/.cache/captures/*.md`, each line timestamped and labelled
   `[STDOUT]`/`[STDERR]` — self-prunes after 30 days; `logit -p` for the plain unlabelled

@@ -46,7 +46,7 @@ tasks:
       # Qualified by workspace: Gita names a worktree by its last two path parts, so this keeps
       # same-named repos in different workspaces from colliding in Gita.
       WORKSPACE="$(basename "$(dirname "$PWD")")"
-      WORK_DIR="./Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
+      WORK_DIR="../Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
 
       # Create new branch or fallback to restoring an existing one
       if git worktree add -b "$SLUG" "$WORK_DIR" main 2>/dev/null || git worktree add -b "$SLUG" "$WORK_DIR" master 2>/dev/null; then
@@ -89,7 +89,7 @@ tasks:
       # Qualified by workspace: Gita names a worktree by its last two path parts, so this keeps
       # same-named repos in different workspaces from colliding in Gita.
       WORKSPACE="$(basename "$(dirname "$PWD")")"
-      WORK_DIR="./Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
+      WORK_DIR="../Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
 
       if [ ! -d "$WORK_DIR" ]; then exit 0; fi
 
@@ -106,7 +106,7 @@ tasks:
       # Qualified by workspace: Gita names a worktree by its last two path parts, so this keeps
       # same-named repos in different workspaces from colliding in Gita.
       WORKSPACE="$(basename "$(dirname "$PWD")")"
-      WORK_DIR="./Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
+      WORK_DIR="../Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
 
       if [ ! -d "$WORK_DIR" ]; then exit 0; fi
 
@@ -122,7 +122,7 @@ tasks:
       # Qualified by workspace: Gita names a worktree by its last two path parts, so this keeps
       # same-named repos in different workspaces from colliding in Gita.
       WORKSPACE="$(basename "$(dirname "$PWD")")"
-      WORK_DIR="./Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
+      WORK_DIR="../Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
 
       if [ ! -d "$WORK_DIR" ]; then exit 0; fi
 
@@ -147,7 +147,7 @@ tasks:
       # Qualified by workspace: Gita names a worktree by its last two path parts, so this keeps
       # same-named repos in different workspaces from colliding in Gita.
       WORKSPACE="$(basename "$(dirname "$PWD")")"
-      WORK_DIR="./Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
+      WORK_DIR="../Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
 
       if [ ! -d "$WORK_DIR" ]; then exit 0; fi
 
@@ -208,7 +208,7 @@ tasks:
       # Qualified by workspace: Gita names a worktree by its last two path parts, so this keeps
       # same-named repos in different workspaces from colliding in Gita.
       WORKSPACE="$(basename "$(dirname "$PWD")")"
-      WORK_DIR="./Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
+      WORK_DIR="../Work/Work-${WORKSPACE}-${SLUG}/${REPO_NAME}"
 
       if [ ! -d "$WORK_DIR" ]; then exit 0; fi
 
